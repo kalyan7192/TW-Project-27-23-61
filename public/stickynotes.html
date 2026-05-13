@@ -683,7 +683,7 @@
 
         async function showCompletedTasks() { const popup = document.getElementById("completedPopup"); const container = document.getElementById("completedContainer"); try { const notes = await apiCall(`/completed-notes/${username}`); container.innerHTML = notes.length ? "" : "<div style='padding:20px; text-align:center; opacity:0.7'>No completed tasks</div>"; notes.forEach(note => { const div = document.createElement("div"); div.className = "completed-task"; div.innerText = note.text; container.appendChild(div); }); } catch (e) { container.innerHTML = "<div>Error</div>"; } popup.style.display = "block"; }
         function closePopup() { document.getElementById("completedPopup").style.display = "none"; }
-        function goBack() { window.location.href = "index.html"; }
+        function goBack() { window.location.href = "main.html"; }
 
         async function checkSharedTasks() {
             try {
