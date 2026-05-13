@@ -21,7 +21,6 @@
             position: relative;
         }
 
-        /* animated gradient orbs */
         body::before,
         body::after {
             content: '';
@@ -59,7 +58,6 @@
             }
         }
 
-        /* toolbar */
         .toolbar {
             position: fixed;
             top: 20px;
@@ -120,7 +118,6 @@
             filter: brightness(1.1);
         }
 
-        /* Unique Action Buttons */
         .action-group {
             display: flex;
             gap: 8px;
@@ -218,7 +215,6 @@
             pointer-events: auto;
         }
 
-        /* notes area */
         #notesArea {
             position: relative;
             width: 100%;
@@ -285,7 +281,6 @@
             font-size: 0.9rem;
         }
 
-        /* Popups */
         .completed-popup,
         .share-modal,
         .receive-task-popup {
@@ -459,7 +454,6 @@
             }
         }
 
-        /* new feature: stats bar */
         .stats-bar {
             position: fixed;
             bottom: 25px;
@@ -522,21 +516,18 @@
 
     <div id="notesArea"></div>
 
-    <!-- Stats Bar - New Feature -->
     <div class="stats-bar" id="statsBar">
         <div>📋 Total Tasks: <span id="totalTasks">0</span></div>
         <div>✅ Completed: <span id="completedCount">0</span></div>
         <div>⭐ Pending: <span id="pendingCount">0</span></div>
     </div>
 
-    <!-- Completed popup -->
     <div class="completed-popup" id="completedPopup">
         <h2>✅ Completed Masterpieces</h2>
         <div id="completedContainer"></div>
         <button class="close-popup" onclick="closePopup()">Close</button>
     </div>
 
-    <!-- Share Modal -->
     <div id="shareModal" class="share-modal" style="display: none;">
         <div class="share-card">
             <h3>🔁 Share Selected Task(s)</h3>
@@ -550,7 +541,6 @@
         </div>
     </div>
 
-    <!-- Receive Task Popup (replaces alert box) -->
     <div id="receiveTaskPopup" class="receive-task-popup" style="display: none;">
         <div class="receive-card">
             <h3>📬 New Shared Task</h3>
@@ -563,6 +553,11 @@
     </div>
 
     <script>
+        // ========== IMPORTANT: CHANGE THIS TO YOUR RENDER BACKEND URL ==========
+        // Replace this URL with your actual Render backend URL (without trailing slash)
+        const API_BASE_URL = "https://tw-project-27-23-61.onrender.com";
+        // ======================================================================
+
         const username = localStorage.getItem("loggedInUsername");
         if (!username) window.location.href = "index.html";
 
@@ -570,14 +565,39 @@
         let noteElementsMap = new Map();
         let selectedNoteIds = new Set();
         let isSelectModeActive = false;
-        let pendingShareRequest = null; // store incoming task for popup
+        let processedTaskIds = new Set();
 
-        // DOM elements
         const selectUniqueBtn = document.getElementById("selectUniqueBtn");
         const completeUniqueBtn = document.getElementById("completeUniqueBtn");
         const deleteUniqueBtn = document.getElementById("deleteUniqueBtn");
         const shareUniqueBtn = document.getElementById("shareUniqueBtn");
         const cancelUniqueBtn = document.getElementById("cancelUniqueBtn");
+
+        // Helper function for API calls with error handling
+        async function apiCall(endpoint, options = {}) {
+            const url = `${API_BASE_URL}${endpoint}`;
+            console.log(`API Call: ${options.method || 'GET'} ${url}`);
+
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error(`API Error (${endpoint}):`, error);
+                showToast(`Connection error: ${error.message}`, true);
+                throw error;
+            }
+        }
 
         function showToast(message, isError = false) {
             let existing = document.querySelector('.toast');
@@ -592,28 +612,26 @@
 
         async function loadNotes() {
             try {
-                const response = await fetch(`http://localhost:5000/get-notes/${username}`);
-                const notes = await response.json();
+                const notes = await apiCall(`/get-notes/${username}`);
                 notesData = notes;
                 notesArea.innerHTML = "";
                 noteElementsMap.clear();
                 notes.forEach(note => createNoteElement(note));
                 updateUniqueButtonsState();
                 updateStats();
-            } catch (err) { console.error(err); showToast("Failed to load notes", true); }
+            } catch (err) {
+                console.error(err);
+                showToast("Failed to load notes. Make sure backend is running.", true);
+            }
         }
 
-        function updateStats() {
+        async function updateStats() {
             document.getElementById("totalTasks").innerText = notesData.length;
-            // Note: completed tasks are stored separately on backend, but we can show pending = total
-            // For better UX, we just show total tasks count
-            document.getElementById("pendingCount").innerText = notesData.length;
-            document.getElementById("completedCount").innerText = "?";
-            // fetch completed count separately
-            fetch(`http://localhost:5000/completed-notes/${username}`).then(res => res.json()).then(completed => {
+            try {
+                const completed = await apiCall(`/completed-notes/${username}`);
                 document.getElementById("completedCount").innerText = completed.length;
                 document.getElementById("pendingCount").innerText = notesData.length;
-            }).catch(e => console.log(e));
+            } catch (e) { console.log(e); }
         }
 
         function createNoteElement(note) {
@@ -631,7 +649,7 @@
             let isDragging = false, offsetX, offsetY;
             function onMouseDown(e) { if (isSelectModeActive) return; isDragging = true; offsetX = e.clientX - noteDiv.offsetLeft; offsetY = e.clientY - noteDiv.offsetTop; noteDiv.style.cursor = "grabbing"; noteDiv.style.transition = "none"; e.preventDefault(); }
             function onMouseMove(e) { if (!isDragging || isSelectModeActive) return; let x = e.clientX - offsetX; let y = e.clientY - offsetY; x = Math.min(Math.max(x, 0), window.innerWidth - noteDiv.offsetWidth); y = Math.min(Math.max(y, 0), window.innerHeight - noteDiv.offsetHeight); noteDiv.style.left = x + "px"; noteDiv.style.top = y + "px"; }
-            async function onMouseUp() { if (isDragging && !isSelectModeActive) { isDragging = false; noteDiv.style.cursor = "grab"; noteDiv.style.transition = ""; await fetch(`http://localhost:5000/move-note/${note._id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ x: parseInt(noteDiv.style.left), y: parseInt(noteDiv.style.top) }) }); } isDragging = false; }
+            async function onMouseUp() { if (isDragging && !isSelectModeActive) { isDragging = false; noteDiv.style.cursor = "grab"; noteDiv.style.transition = ""; await apiCall(`/move-note/${note._id}`, { method: "PUT", body: JSON.stringify({ x: parseInt(noteDiv.style.left), y: parseInt(noteDiv.style.top) }) }); } isDragging = false; }
             noteDiv.addEventListener("mousedown", onMouseDown);
             document.addEventListener("mousemove", onMouseMove);
             document.addEventListener("mouseup", onMouseUp);
@@ -652,33 +670,26 @@
 
         function exitSelectMode() { if (!isSelectModeActive) return; isSelectModeActive = false; selectedNoteIds.clear(); for (let div of noteElementsMap.values()) { div.classList.remove("selected"); div.style.cursor = "grab"; div.classList.remove("dragging-disabled"); } selectUniqueBtn.style.display = "flex"; cancelUniqueBtn.style.display = "none"; updateUniqueButtonsState(); showToast("🔓 Selection mode off", false); }
 
-        async function completeSelectedTasks() { if (!isSelectModeActive || selectedNoteIds.size === 0) return; const ids = Array.from(selectedNoteIds); for (let id of ids) await fetch(`http://localhost:5000/complete-note/${id}`, { method: "PUT" }); showToast(`🎉 Completed ${ids.length} task(s)!`, false); exitSelectMode(); loadNotes(); }
-        async function deleteSelectedTasks() { if (!isSelectModeActive || selectedNoteIds.size === 0) return; const ids = Array.from(selectedNoteIds); for (let id of ids) await fetch(`http://localhost:5000/delete-note/${id}`, { method: "DELETE" }); showToast(`🗑️ Deleted ${ids.length} task(s)`, false); exitSelectMode(); loadNotes(); }
+        async function completeSelectedTasks() { if (!isSelectModeActive || selectedNoteIds.size === 0) return; const ids = Array.from(selectedNoteIds); for (let id of ids) await apiCall(`/complete-note/${id}`, { method: "PUT" }); showToast(`🎉 Completed ${ids.length} task(s)!`, false); exitSelectMode(); loadNotes(); }
+        async function deleteSelectedTasks() { if (!isSelectModeActive || selectedNoteIds.size === 0) return; const ids = Array.from(selectedNoteIds); for (let id of ids) await apiCall(`/delete-note/${id}`, { method: "DELETE" }); showToast(`🗑️ Deleted ${ids.length} task(s)`, false); exitSelectMode(); loadNotes(); }
         function shareSelectedTasks() { if (!isSelectModeActive || selectedNoteIds.size === 0) return; const texts = Array.from(selectedNoteIds).map(id => notesData.find(n => n._id === id)?.text).filter(t => t); if (texts.length) openShareModal(texts); }
 
         let pendingShareTexts = [];
         function openShareModal(textsArray) { pendingShareTexts = textsArray; const modal = document.getElementById("shareModal"); const previewDiv = document.getElementById("shareTasksPreview"); previewDiv.innerHTML = `<strong>${textsArray.length} task(s):</strong><br>${textsArray.map((t, i) => `${i + 1}. ${t.length > 55 ? t.slice(0, 55) + '…' : t}`).join('<br>')}`; document.getElementById("shareTargetUser").value = ""; modal.style.display = "flex"; }
         function closeShareModal() { document.getElementById("shareModal").style.display = "none"; pendingShareTexts = []; }
-        async function confirmShareMultiple() { const receiver = document.getElementById("shareTargetUser").value.trim(); if (!receiver) { showToast("Enter username", true); return; } if (!pendingShareTexts.length) return; let success = 0; for (let text of pendingShareTexts) { try { const res = await fetch("http://localhost:5000/share-note", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ fromUser: username, toUser: receiver, text }) }); const data = await res.json(); if (data.success || data.message?.includes("shared")) success++; } catch (e) { } } showToast(`📤 Shared ${success}/${pendingShareTexts.length} tasks`, success === 0); closeShareModal(); if (success > 0) exitSelectMode(); }
+        async function confirmShareMultiple() { const receiver = document.getElementById("shareTargetUser").value.trim(); if (!receiver) { showToast("Enter username", true); return; } if (!pendingShareTexts.length) return; let success = 0; for (let text of pendingShareTexts) { try { const data = await apiCall(`/share-note`, { method: "POST", body: JSON.stringify({ fromUser: username, toUser: receiver, text }) }); if (data.success || data.message?.includes("shared")) success++; } catch (e) { } } showToast(`📤 Shared ${success}/${pendingShareTexts.length} tasks`, success === 0); closeShareModal(); if (success > 0) exitSelectMode(); }
 
-        async function addNote() { const text = document.getElementById("noteText").value.trim(); if (!text) { showToast("Write something", true); return; } try { const res = await fetch("http://localhost:5000/add-note", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username, text }) }); const data = await res.json(); if (data.success) { document.getElementById("noteText").value = ""; showToast("✨ Task created!"); loadNotes(); } else showToast("Failed", true); } catch (e) { showToast("Server error", true); } }
+        async function addNote() { const text = document.getElementById("noteText").value.trim(); if (!text) { showToast("Write something", true); return; } try { const data = await apiCall(`/add-note`, { method: "POST", body: JSON.stringify({ username, text }) }); if (data.success) { document.getElementById("noteText").value = ""; showToast("✨ Task created!"); loadNotes(); } else showToast("Failed", true); } catch (e) { showToast("Server error", true); } }
 
-        async function showCompletedTasks() { const popup = document.getElementById("completedPopup"); const container = document.getElementById("completedContainer"); try { const res = await fetch(`http://localhost:5000/completed-notes/${username}`); const notes = await res.json(); container.innerHTML = notes.length ? "" : "<div style='padding:20px; text-align:center; opacity:0.7'>No completed tasks</div>"; notes.forEach(note => { const div = document.createElement("div"); div.className = "completed-task"; div.innerText = note.text; container.appendChild(div); }); } catch (e) { container.innerHTML = "<div>Error</div>"; } popup.style.display = "block"; }
+        async function showCompletedTasks() { const popup = document.getElementById("completedPopup"); const container = document.getElementById("completedContainer"); try { const notes = await apiCall(`/completed-notes/${username}`); container.innerHTML = notes.length ? "" : "<div style='padding:20px; text-align:center; opacity:0.7'>No completed tasks</div>"; notes.forEach(note => { const div = document.createElement("div"); div.className = "completed-task"; div.innerText = note.text; container.appendChild(div); }); } catch (e) { container.innerHTML = "<div>Error</div>"; } popup.style.display = "block"; }
         function closePopup() { document.getElementById("completedPopup").style.display = "none"; }
-        function goBack() { window.location.href = "main.html"; }
-
-        // FIXED: Shared tasks with beautiful popup instead of alert, and prevent duplicate addition
-        let processedTaskIds = new Set(); // track processed tasks to avoid duplicates
+        function goBack() { window.location.href = "index.html"; }
 
         async function checkSharedTasks() {
             try {
-                const response = await fetch(`http://localhost:5000/shared-tasks/${username}`);
-                const tasks = await response.json();
+                const tasks = await apiCall(`/shared-tasks/${username}`);
                 for (let task of tasks) {
-                    // Skip if already processed
                     if (processedTaskIds.has(task._id)) continue;
-
-                    // Show beautiful popup instead of alert
                     processedTaskIds.add(task._id);
                     showReceiveTaskPopup(task);
                 }
@@ -696,12 +707,11 @@
         `;
             popup.style.display = "flex";
 
-            // Store task data for accept/reject
             const acceptBtn = document.getElementById("acceptTaskBtn");
             const rejectBtn = document.getElementById("rejectTaskBtn");
 
             const acceptHandler = async () => {
-                await fetch(`http://localhost:5000/accept-task/${task._id}`, { method: "POST" });
+                await apiCall(`/accept-task/${task._id}`, { method: "POST" });
                 showToast(`✨ Task added from ${task.fromUser}!`, false);
                 loadNotes();
                 popup.style.display = "none";
@@ -736,6 +746,17 @@
         document.getElementById("cancelShareModalBtn")?.addEventListener("click", closeShareModal);
         window.addEventListener("click", (e) => { if (e.target === document.getElementById("shareModal")) closeShareModal(); if (e.target === document.getElementById("receiveTaskPopup")) document.getElementById("receiveTaskPopup").style.display = "none"; });
 
+        // Check connection on load
+        async function testConnection() {
+            try {
+                await apiCall(`/get-notes/${username}`);
+                showToast("✅ Connected to backend successfully!", false);
+            } catch (e) {
+                showToast("⚠️ Cannot connect to backend. Check if Render URL is correct and CORS is enabled.", true);
+            }
+        }
+
+        testConnection();
         setInterval(checkSharedTasks, 5000);
         loadNotes();
     </script>
