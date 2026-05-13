@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>AI Resume Builder | Smart Suggestions & Multiple Layouts</title>
+    <title>Resume Architect | Smart Suite & Premium Layouts</title>
     <!-- html2pdf library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <!-- Font Awesome 6 -->
@@ -13,6 +13,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&display=swap"
         rel="stylesheet">
+    <!-- Animate.css for extra flare -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
         * {
             margin: 0;
@@ -22,13 +24,14 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            background: radial-gradient(circle at 10% 20%, rgba(5, 15, 25, 1) 0%, #0a0f1f 100%);
             min-height: 100vh;
             padding: 24px;
             position: relative;
+            overflow-x: hidden;
         }
 
-        /* Animated background particles effect */
+        /* animated grain / floating orbs */
         body::before {
             content: '';
             position: fixed;
@@ -36,8 +39,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: radial-gradient(circle at 20% 40%, rgba(56, 189, 248, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.08) 0%, transparent 50%);
+            background-image: radial-gradient(circle at 30% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 60%),
+                radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.08) 0%, transparent 55%),
+                repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.01) 0px, rgba(255, 255, 255, 0.01) 2px, transparent 2px, transparent 8px);
             pointer-events: none;
             z-index: 0;
         }
@@ -49,50 +53,69 @@
             z-index: 2;
         }
 
-        /* Header with glow animation */
+        /* header glassmorphic */
         .header {
             text-align: center;
-            margin-bottom: 28px;
-            animation: fadeInDown 0.6s ease;
+            margin-bottom: 32px;
+            animation: fadeInDown 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            backdrop-filter: blur(4px);
         }
 
         .header h1 {
-            font-size: 2.5rem;
-            background: linear-gradient(135deg, #38bdf8, #a855f7);
+            font-size: 2.8rem;
+            background: linear-gradient(135deg, #93c5fd, #a855f7, #38bdf8);
+            background-size: 200% auto;
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
             display: inline-block;
             letter-spacing: -0.5px;
+            animation: shimmer 4s infinite linear;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
         }
 
         .header p {
-            color: #94a3b8;
+            color: #a5b4fc;
+            font-weight: 500;
             margin-top: 8px;
+            letter-spacing: 0.3px;
         }
 
         /* Main Grid */
         .main-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 24px;
+            gap: 28px;
         }
 
-        /* Left Panel - Form */
+        /* Left Panel - glass card */
         .form-panel {
-            background: rgba(30, 41, 59, 0.8);
-            backdrop-filter: blur(12px);
-            border-radius: 32px;
-            padding: 24px;
-            border: 1px solid rgba(56, 189, 248, 0.2);
-            box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.4);
-            transition: transform 0.3s;
+            background: rgba(15, 25, 45, 0.7);
+            backdrop-filter: blur(16px);
+            border-radius: 40px;
+            padding: 28px;
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            box-shadow: 0 30px 45px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
             max-height: 85vh;
             overflow-y: auto;
         }
 
         .form-panel::-webkit-scrollbar {
-            width: 6px;
+            width: 5px;
         }
 
         .form-panel::-webkit-scrollbar-track {
@@ -106,19 +129,26 @@
         }
 
         .section-card {
-            background: rgba(15, 23, 42, 0.7);
-            border-radius: 24px;
-            padding: 20px;
+            background: rgba(5, 15, 30, 0.7);
+            border-radius: 28px;
+            padding: 20px 22px;
             margin-bottom: 24px;
-            border-left: 3px solid #38bdf8;
-            transition: all 0.2s;
+            border-left: 4px solid #3b82f6;
+            transition: all 0.25s ease;
+            box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.3);
+        }
+
+        .section-card:hover {
+            border-left-color: #a855f7;
+            transform: translateY(-3px);
+            background: rgba(10, 25, 45, 0.8);
         }
 
         .section-title {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 18px;
+            margin-bottom: 20px;
             color: #f1f5f9;
             font-weight: 700;
             font-size: 1.2rem;
@@ -126,56 +156,61 @@
 
         .section-title i {
             color: #38bdf8;
-            margin-right: 10px;
+            margin-right: 12px;
         }
 
         .remove-btn {
             background: rgba(239, 68, 68, 0.2);
             border: none;
-            color: #f87171;
+            color: #fecaca;
             cursor: pointer;
-            padding: 6px 12px;
+            padding: 6px 14px;
             border-radius: 40px;
-            font-size: 0.75rem;
-            transition: 0.2s;
+            font-size: 0.7rem;
+            font-weight: 600;
+            transition: 0.25s;
         }
 
         .remove-btn:hover {
             background: #ef4444;
             color: white;
-            transform: scale(0.95);
+            transform: scale(0.96);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
         }
 
         .add-btn {
-            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            background: linear-gradient(95deg, #2563eb, #7c3aed);
             border: none;
-            padding: 10px 20px;
-            border-radius: 40px;
+            padding: 12px 18px;
+            border-radius: 60px;
             color: white;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             width: 100%;
-            margin-top: 8px;
-            transition: 0.2s;
+            margin-top: 10px;
+            transition: 0.25s;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
 
         .add-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(56, 189, 248, 0.3);
+            box-shadow: 0 12px 22px rgba(56, 189, 248, 0.4);
+            background: linear-gradient(95deg, #3b82f6, #8b5cf6);
         }
 
         input,
         textarea,
         select {
             width: 100%;
-            padding: 12px 14px;
-            background: #0f172a;
+            padding: 12px 16px;
+            background: #0f172ad9;
             border: 1px solid #334155;
-            border-radius: 16px;
-            color: #e2e8f0;
+            border-radius: 20px;
+            color: #eef2ff;
             font-family: 'Inter', sans-serif;
             transition: 0.2s;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
+            font-size: 0.9rem;
         }
 
         input:focus,
@@ -183,12 +218,14 @@
         select:focus {
             outline: none;
             border-color: #38bdf8;
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.3);
+            background: #0a1122;
         }
 
         label {
-            font-size: 0.85rem;
-            color: #94a3b8;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #b9c7e0;
             margin-bottom: 6px;
             display: flex;
             align-items: center;
@@ -196,37 +233,36 @@
         }
 
         .suggestion-badge {
-            background: #3b82f6;
+            background: linear-gradient(120deg, #1e40af, #4c1d95);
             border-radius: 40px;
-            padding: 4px 12px;
+            padding: 6px 16px;
             font-size: 0.7rem;
+            font-weight: 600;
             cursor: pointer;
             transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
         }
 
         .suggestion-badge:hover {
-            background: #2563eb;
+            background: linear-gradient(120deg, #2563eb, #7e22ce);
             transform: scale(1.02);
         }
 
-        /* Right Panel - Preview & Layouts */
-        .right-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
+        /* Layout selector */
         .layout-selector {
-            background: rgba(30, 41, 59, 0.8);
-            backdrop-filter: blur(12px);
-            border-radius: 28px;
-            padding: 16px 20px;
+            background: rgba(15, 25, 45, 0.7);
+            backdrop-filter: blur(16px);
+            border-radius: 36px;
+            padding: 18px 24px;
             border: 1px solid rgba(56, 189, 248, 0.3);
         }
 
         .layout-buttons {
             display: flex;
-            gap: 12px;
+            gap: 14px;
             margin-top: 12px;
             flex-wrap: wrap;
         }
@@ -234,44 +270,46 @@
         .layout-btn {
             background: #0f172a;
             border: 1px solid #334155;
-            padding: 10px 20px;
-            border-radius: 40px;
+            padding: 10px 22px;
+            border-radius: 50px;
             color: #cbd5e1;
             cursor: pointer;
-            transition: 0.2s;
+            transition: 0.25s;
+            font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
         .layout-btn.active {
-            background: linear-gradient(135deg, #38bdf8, #a855f7);
+            background: linear-gradient(135deg, #3b82f6, #a855f7);
             border-color: transparent;
             color: white;
-            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.4);
+            box-shadow: 0 6px 14px rgba(59, 130, 246, 0.5);
         }
 
         .preview-container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 28px;
-            padding: 20px;
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 36px;
+            padding: 24px;
             min-height: 70vh;
             transition: all 0.3s;
-            box-shadow: 0 20px 35px -10px black;
+            box-shadow: 0 30px 35px -12px black;
             overflow-y: auto;
             max-height: 70vh;
         }
 
         .action-bar {
             display: flex;
-            gap: 16px;
+            gap: 14px;
             justify-content: flex-end;
+            margin-top: 18px;
         }
 
         .action-btn {
-            background: linear-gradient(135deg, #10b981, #059669);
+            background: linear-gradient(135deg, #10b981, #047857);
             padding: 12px 28px;
-            border-radius: 40px;
+            border-radius: 50px;
             font-weight: bold;
             border: none;
             color: white;
@@ -280,13 +318,40 @@
         }
 
         .reset-action {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
+            background: linear-gradient(135deg, #f43f5e, #be123c);
+        }
+
+        .dashboard-btn {
+            background: linear-gradient(135deg, #475569, #1e293b);
+            padding: 12px 28px;
+            border-radius: 50px;
+            font-weight: bold;
+            border: none;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: auto;
+        }
+
+        .dashboard-btn:hover,
+        .action-btn:hover {
+            transform: scale(1.02);
+            filter: brightness(1.05);
+        }
+
+        /* Resume preview base styles */
+        .resume-preview-card {
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
         }
 
         @keyframes fadeInDown {
             from {
                 opacity: 0;
-                transform: translateY(-20px);
+                transform: translateY(-30px);
             }
 
             to {
@@ -295,39 +360,13 @@
             }
         }
 
-        @keyframes pulseGlow {
-            0% {
-                box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4);
-            }
-
-            70% {
-                box-shadow: 0 0 0 10px rgba(56, 189, 248, 0);
-            }
-        }
-
-        /* Layout Styles inside preview */
-        .resume-preview-card {
-            font-family: 'Inter', sans-serif;
-        }
-
-        .layout-modern .resume-header-modern {
-            background: linear-gradient(135deg, #1e293b, #0f172a);
-            color: white;
-            padding: 24px;
-            border-radius: 20px;
-        }
-
-        .layout-minimal .resume-item {
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .layout-elegant {
-            background: #fef9f0;
-        }
-
         @media (max-width: 1000px) {
             .main-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .form-panel {
+                max-height: 70vh;
             }
         }
     </style>
@@ -335,49 +374,67 @@
 
 <body>
     <div class="app-wrapper">
-        <div class="header">
-            <h1><i class="fas fa-robot"></i> AI Resume Architect</h1>
-            <p>Smart suggestions • Removable sections • Multiple layouts • Live preview</p>
+        <div class="header animate__animated animate__fadeInUp">
+            <h1><i class="fas fa-brain"></i> Resume Architect</h1>
+            <p>✨ Smart suggestions • Dynamic sections • Portfolio-ready layouts • Instant preview</p>
         </div>
         <div class="main-grid">
-            <!-- LEFT FORM PANEL -->
+            <!-- LEFT PANEL: expanded inputs -->
             <div class="form-panel" id="formPanel">
                 <div id="dynamicSectionsContainer">
-                    <!-- Basic Info (fixed) -->
+                    <!-- Basic Info with extra fields -->
                     <div class="section-card" data-section="basic">
-                        <div class="section-title"><span><i class="fas fa-user-astronaut"></i> Personal Info</span>
+                        <div class="section-title"><span><i class="fas fa-user-astronaut"></i> Personal Profile</span>
                         </div>
-                        <input type="text" id="fullName" placeholder="Full Name" value="Alex Morgan">
-                        <input type="text" id="jobTitle" placeholder="Professional Title"
-                            value="Senior Full Stack Engineer">
-                        <input type="email" id="email" placeholder="Email" value="alex@example.com">
-                        <input type="text" id="phone" placeholder="Phone" value="+1 555 123 4567">
-                        <input type="text" id="location" placeholder="Location" value="San Francisco, CA">
+                        <input type="text" id="fullName" placeholder="Full Name" value="">
+                        <input type="text" id="jobTitle" placeholder="Professional Title" value="">
+                        <input type="email" id="email" placeholder="Email" value="">
+                        <input type="text" id="phone" placeholder="Phone" value="">
+                        <input type="text" id="location" placeholder="Location" value="">
+                        <input type="text" id="linkedin" placeholder="LinkedIn URL" value="">
+                        <input type="text" id="github" placeholder="GitHub / Portfolio" value="">
                     </div>
-                    <!-- Summary with AI suggestion -->
+                    <!-- Summary with AI -->
                     <div class="section-card">
                         <div class="section-title"><span><i class="fas fa-comment-dots"></i> Professional Summary</span>
                         </div>
-                        <textarea id="summary"
-                            rows="3">Innovative Full Stack Engineer with 6+ years of experience building scalable web apps. Passionate about AI and modern UI/UX.</textarea>
+                        <textarea id="summary" rows="3"></textarea>
                         <div style="display: flex; justify-content: flex-end; margin-top: 5px;"><span
                                 class="suggestion-badge" onclick="applyAISuggestion('summary')"><i
-                                    class="fas fa-magic"></i> AI Suggest</span></div>
+                                    class="fas fa-magic"></i> AI Summarize</span></div>
                     </div>
-                    <!-- Skills -->
+                    <!-- Skills with AI suggestions -->
                     <div class="section-card">
                         <div class="section-title"><span><i class="fas fa-code"></i> Technical Skills</span><button
                                 class="remove-btn" onclick="removeSection(this)"><i class="fas fa-trash"></i>
                                 Remove</button></div>
-                        <input type="text" id="skillsInput" placeholder="Comma separated skills"
-                            value="React, Node.js, Python, AWS, TailwindCSS">
-                        <span class="suggestion-badge" onclick="suggestSkills()"><i class="fas fa-lightbulb"></i>
-                            Suggest In-Demand Skills</span>
+                        <input type="text" id="skillsInput" placeholder="Comma separated skills" value="">
+                        <div style="display: flex; justify-content: flex-end;"><span class="suggestion-badge"
+                                onclick="suggestSkills()"><i class="fas fa-lightbulb"></i> Suggest In-Demand
+                                Skills</span></div>
+                    </div>
+                    <!-- Languages section (extra) -->
+                    <div class="section-card" id="languagesCard">
+                        <div class="section-title"><span><i class="fas fa-language"></i> Languages</span><button
+                                class="remove-btn" onclick="removeSection(this)"><i class="fas fa-trash"></i>
+                                Remove</button></div>
+                        <input type="text" id="languages" placeholder="e.g., English (Native), Spanish (Fluent)"
+                            value="">
+                    </div>
+                    <!-- Certifications -->
+                    <div class="section-card" id="certsCard">
+                        <div class="section-title"><span><i class="fas fa-certificate"></i> Certifications</span><button
+                                class="remove-btn" onclick="removeSection(this)"><i class="fas fa-trash"></i>
+                                Remove</button></div>
+                        <input type="text" id="certifications" placeholder="e.g., AWS Solutions Architect, Scrum Master"
+                            value="">
                     </div>
                 </div>
                 <button class="add-btn" onclick="addNewSection()"><i class="fas fa-plus-circle"></i> + Add Section
                     (Experience / Education)</button>
-                <div style="margin-top: 20px; display: flex; gap: 12px;">
+                <div class="action-bar">
+                    <button class="dashboard-btn" id="dashboardBtn"><i class="fas fa-arrow-left"></i> Back to
+                        Dashboard</button>
                     <button class="action-btn" id="downloadPdfBtn"><i class="fas fa-download"></i> Download PDF</button>
                     <button class="action-btn reset-action" id="resetAllBtn"><i class="fas fa-sync-alt"></i> Reset
                         All</button>
@@ -386,36 +443,36 @@
 
             <!-- RIGHT PANEL -->
             <div class="right-panel">
-                <div class="layout-selector">
-                    <label><i class="fas fa-palette"></i> Choose Resume Layout:</label>
+                <div class="layout-selector animate__animated animate__fadeInRight">
+                    <label><i class="fas fa-palette"></i> ✨ Select Signature Layout:</label>
                     <div class="layout-buttons">
-                        <button class="layout-btn active" data-layout="modern"><i class="fas fa-layer-group"></i>
+                        <button class="layout-btn active" data-layout="modern"><i class="fas fa-globe"></i>
                             Modern</button>
-                        <button class="layout-btn" data-layout="minimal"><i class="fas fa-border-all"></i>
+                        <button class="layout-btn" data-layout="minimal"><i class="fas fa-minimize"></i>
                             Minimal</button>
-                        <button class="layout-btn" data-layout="elegant"><i class="fas fa-feather-alt"></i>
-                            Elegant</button>
+                        <button class="layout-btn" data-layout="elegant"><i class="fas fa-feather"></i> Elegant</button>
                     </div>
                 </div>
                 <div class="preview-container" id="previewContainer">
-                    <div id="resumeLivePreview" class="resume-preview-card">Loading preview...</div>
+                    <div id="resumeLivePreview" class="resume-preview-card">✨ Loading your professional resume...</div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // ----- Data store for dynamic sections (experience/education)
-        let dynamicSections = []; // each: { type, id, data: { title, company, date, desc } or { degree, institution, year, desc } }
+        // Data store for dynamic sections
+        let dynamicSections = []; // each: { type, id, data }
 
-        function generateId() { return Date.now() + '-' + Math.random(); }
+        function generateId() { return Date.now() + '-' + Math.random().toString(36).substr(2, 6); }
 
+        // Add new custom section (experience/education)
         function addNewSection() {
             const type = prompt("Add section: Type 'exp' for Work Experience or 'edu' for Education", "exp");
             if (type === 'exp') {
-                dynamicSections.push({ type: 'exp', id: generateId(), data: { title: 'Software Engineer', company: 'Tech Corp', date: '2022-Present', desc: 'Led frontend team...' } });
+                dynamicSections.push({ type: 'exp', id: generateId(), data: { title: '', company: '', date: '', desc: '' } });
             } else if (type === 'edu') {
-                dynamicSections.push({ type: 'edu', id: generateId(), data: { degree: 'M.Sc. Computer Science', institution: 'Stanford University', year: '2018-2020', desc: 'Focus on AI' } });
+                dynamicSections.push({ type: 'edu', id: generateId(), data: { degree: '', institution: '', year: '', desc: '' } });
             } else { return; }
             renderFormSections();
             renderResumePreview();
@@ -434,129 +491,140 @@
 
         function renderFormSections() {
             const container = document.getElementById('dynamicSectionsContainer');
+            // Keep static sections in exact order: basic -> summary -> skills -> languages -> certifications + dynamic
+            const basicDiv = document.querySelector('.section-card[data-section="basic"]')?.outerHTML || '';
+            const summaryDiv = document.querySelector('.section-card:has(#summary)')?.outerHTML || '';
+            const skillsDiv = document.querySelector('.section-card:has(#skillsInput)')?.outerHTML || '';
+            const languagesDiv = document.getElementById('languagesCard')?.outerHTML || '';
+            const certsDiv = document.getElementById('certsCard')?.outerHTML || '';
+
             let extraHtml = '';
             dynamicSections.forEach(sec => {
                 if (sec.type === 'exp') {
                     extraHtml += `<div class="section-card" data-dyn-id="${sec.id}">
-                    <div class="section-title"><span><i class="fas fa-briefcase"></i> Work Experience</span><button class="remove-btn" onclick="removeSectionFromData('${sec.id}')"><i class="fas fa-trash"></i> Remove</button></div>
-                    <input type="text" placeholder="Job Title" value="${escapeHtml(sec.data.title)}" oninput="updateDynamicField('${sec.id}', 'title', this.value)">
-                    <input type="text" placeholder="Company" value="${escapeHtml(sec.data.company)}" oninput="updateDynamicField('${sec.id}', 'company', this.value)">
-                    <input type="text" placeholder="Date (e.g. 2021-2024)" value="${escapeHtml(sec.data.date)}" oninput="updateDynamicField('${sec.id}', 'date', this.value)">
-                    <textarea rows="2" placeholder="Description" oninput="updateDynamicField('${sec.id}', 'desc', this.value)">${escapeHtml(sec.data.desc)}</textarea>
-                </div>`;
+                        <div class="section-title"><span><i class="fas fa-briefcase"></i> Work Experience</span><button class="remove-btn" onclick="removeSectionFromData('${sec.id}')"><i class="fas fa-trash"></i> Remove</button></div>
+                        <input type="text" placeholder="Job Title" value="${escapeHtml(sec.data.title)}" oninput="updateDynamicField('${sec.id}', 'title', this.value)">
+                        <input type="text" placeholder="Company" value="${escapeHtml(sec.data.company)}" oninput="updateDynamicField('${sec.id}', 'company', this.value)">
+                        <input type="text" placeholder="Date (e.g. 2019-2023)" value="${escapeHtml(sec.data.date)}" oninput="updateDynamicField('${sec.id}', 'date', this.value)">
+                        <textarea rows="2" placeholder="Description / Achievements" oninput="updateDynamicField('${sec.id}', 'desc', this.value)">${escapeHtml(sec.data.desc)}</textarea>
+                    </div>`;
                 } else {
                     extraHtml += `<div class="section-card" data-dyn-id="${sec.id}">
-                    <div class="section-title"><span><i class="fas fa-graduation-cap"></i> Education</span><button class="remove-btn" onclick="removeSectionFromData('${sec.id}')"><i class="fas fa-trash"></i> Remove</button></div>
-                    <input type="text" placeholder="Degree" value="${escapeHtml(sec.data.degree)}" oninput="updateDynamicField('${sec.id}', 'degree', this.value)">
-                    <input type="text" placeholder="Institution" value="${escapeHtml(sec.data.institution)}" oninput="updateDynamicField('${sec.id}', 'institution', this.value)">
-                    <input type="text" placeholder="Year" value="${escapeHtml(sec.data.year)}" oninput="updateDynamicField('${sec.id}', 'year', this.value)">
-                    <textarea rows="2" placeholder="Details" oninput="updateDynamicField('${sec.id}', 'desc', this.value)">${escapeHtml(sec.data.desc)}</textarea>
-                </div>`;
+                        <div class="section-title"><span><i class="fas fa-graduation-cap"></i> Education</span><button class="remove-btn" onclick="removeSectionFromData('${sec.id}')"><i class="fas fa-trash"></i> Remove</button></div>
+                        <input type="text" placeholder="Degree" value="${escapeHtml(sec.data.degree)}" oninput="updateDynamicField('${sec.id}', 'degree', this.value)">
+                        <input type="text" placeholder="Institution" value="${escapeHtml(sec.data.institution)}" oninput="updateDynamicField('${sec.id}', 'institution', this.value)">
+                        <input type="text" placeholder="Year" value="${escapeHtml(sec.data.year)}" oninput="updateDynamicField('${sec.id}', 'year', this.value)">
+                        <textarea rows="2" placeholder="Additional details" oninput="updateDynamicField('${sec.id}', 'desc', this.value)">${escapeHtml(sec.data.desc)}</textarea>
+                    </div>`;
                 }
             });
-            const basicSection = document.querySelector('.section-card[data-section="basic"]')?.outerHTML || '';
-            const summarySection = document.querySelector('.section-card:has(#summary)')?.outerHTML || '';
-            const skillsSectionDiv = document.querySelector('.section-card:has(#skillsInput)')?.outerHTML || '';
-            container.innerHTML = basicSection + summarySection + skillsSectionDiv + extraHtml;
-            // reattach events for basic fields after rerender? but global listeners will work through getElementById
+            container.innerHTML = basicDiv + summaryDiv + skillsDiv + languagesDiv + certsDiv + extraHtml;
             attachGlobalInputs();
         }
 
         function attachGlobalInputs() {
-            const fields = ['fullName', 'jobTitle', 'email', 'phone', 'location', 'summary', 'skillsInput'];
+            const fields = ['fullName', 'jobTitle', 'email', 'phone', 'location', 'linkedin', 'github', 'summary', 'skillsInput', 'languages', 'certifications'];
             fields.forEach(f => { let el = document.getElementById(f); if (el) el.oninput = () => renderResumePreview(); });
         }
 
-        // AI SUGGESTIONS
+        // AI suggestions enhanced
         function applyAISuggestion(fieldId) {
-            const suggestions = {
-                summary: "Results-driven professional with a track record of delivering high-impact solutions. Expert in full-stack development, cloud architecture, and leading agile teams to exceed business goals."
-            };
-            if (fieldId === 'summary') document.getElementById('summary').value = suggestions.summary;
+            if (fieldId === 'summary') {
+                const suggestions = [
+                    "Visionary Full Stack Architect with 8+ years of engineering excellence. Expert in building cloud-native platforms and leading agile teams to deliver product growth of 200% YoY.",
+                    "Strategic tech leader blending AI, modern web frameworks, and DevOps culture. Proven track record in startup scale-ups and enterprise migrations."
+                ];
+                document.getElementById('summary').value = suggestions[Math.floor(Math.random() * suggestions.length)];
+            }
             renderResumePreview();
         }
         function suggestSkills() {
-            const skillSet = "Python, React, TypeScript, FastAPI, Docker, Kubernetes, GraphQL, PostgreSQL, CI/CD";
-            document.getElementById('skillsInput').value = skillSet;
+            const freshSkills = "TypeScript, Next.js, Tailwind, Prisma, Docker, Kubernetes, Redis, MongoDB, Express, FastAPI, CI/CD Pipelines";
+            document.getElementById('skillsInput').value = freshSkills;
             renderResumePreview();
         }
 
         let currentLayout = 'modern';
 
-        // RENDER RESUME based on all data + dynamic sections
+        // Main rendering with all new fields
         function renderResumePreview() {
             const name = document.getElementById('fullName')?.value || 'Your Name';
             const title = document.getElementById('jobTitle')?.value || 'Professional';
             const email = document.getElementById('email')?.value || '';
             const phone = document.getElementById('phone')?.value || '';
             const location = document.getElementById('location')?.value || '';
+            const linkedin = document.getElementById('linkedin')?.value || '';
+            const github = document.getElementById('github')?.value || '';
             const summary = document.getElementById('summary')?.value || 'No summary provided.';
             const skillsRaw = document.getElementById('skillsInput')?.value || '';
+            const languages = document.getElementById('languages')?.value || '';
+            const certifications = document.getElementById('certifications')?.value || '';
             const skillsArray = skillsRaw.split(',').map(s => s.trim()).filter(s => s);
 
             let expHtml = '', eduHtml = '';
             dynamicSections.forEach(sec => {
                 if (sec.type === 'exp') {
-                    expHtml += `<div style="margin-bottom: 16px;"><strong>${escapeHtml(sec.data.title)}</strong> at ${escapeHtml(sec.data.company)}<br><span style="font-size:0.8rem;color:#64748b;">${escapeHtml(sec.data.date)}</span><p style="margin-top:5px;">${escapeHtml(sec.data.desc)}</p></div>`;
+                    expHtml += `<div class="exp-item" style="margin-bottom: 18px;"><strong style="font-size:1rem;">${escapeHtml(sec.data.title)}</strong> @ ${escapeHtml(sec.data.company)}<div style="font-size:0.75rem; color:#4b5563; margin:4px 0;">${escapeHtml(sec.data.date)}</div><p style="margin-top:6px; line-height:1.4;">${escapeHtml(sec.data.desc)}</p></div>`;
                 } else {
-                    eduHtml += `<div style="margin-bottom: 16px;"><strong>${escapeHtml(sec.data.degree)}</strong> - ${escapeHtml(sec.data.institution)}<br><span style="font-size:0.8rem;">${escapeHtml(sec.data.year)}</span><p>${escapeHtml(sec.data.desc)}</p></div>`;
+                    eduHtml += `<div class="edu-item" style="margin-bottom: 16px;"><strong>${escapeHtml(sec.data.degree)}</strong><br/><span style="font-size:0.85rem;">${escapeHtml(sec.data.institution)} | ${escapeHtml(sec.data.year)}</span><p style="margin-top:5px;">${escapeHtml(sec.data.desc)}</p></div>`;
                 }
             });
 
-            // apply layout classes
-            let layoutClass = '';
-            let mainStyle = '';
-            if (currentLayout === 'modern') layoutClass = 'layout-modern';
-            else if (currentLayout === 'minimal') layoutClass = 'layout-minimal';
-            else layoutClass = 'layout-elegant';
+            const langHtml = languages ? `<div><h4 class="detail-title"><i class="fas fa-globe"></i> Languages</h4><p>${escapeHtml(languages)}</p></div>` : '';
+            const certHtml = certifications ? `<div><h4 class="detail-title"><i class="fas fa-award"></i> Certifications</h4><p>${escapeHtml(certifications)}</p></div>` : '';
+            const contactRow = `${email ? `<span><i class="fas fa-envelope"></i> ${escapeHtml(email)}</span>` : ''} ${phone ? `<span><i class="fas fa-phone-alt"></i> ${escapeHtml(phone)}</span>` : ''} ${location ? `<span><i class="fas fa-map-marker-alt"></i> ${escapeHtml(location)}</span>` : ''}`;
+            const socialRow = `${linkedin ? `<span><i class="fab fa-linkedin"></i> ${escapeHtml(linkedin)}</span>` : ''} ${github ? `<span><i class="fab fa-github"></i> ${escapeHtml(github)}</span>` : ''}`;
 
-            let html = `<div class="${layoutClass}" style="font-family:'Inter'; padding:20px;">`;
+            let html = '';
             if (currentLayout === 'modern') {
-                html = `<div class="${layoutClass}"><div class="resume-header-modern" style="background: linear-gradient(135deg, #1e293b, #0f172a); color:white; padding: 28px; border-radius: 24px; margin-bottom: 24px;">
-                        <h2 style="font-size:2rem;">${escapeHtml(name)}</h2>
-                        <p style="color:#94a3b8;">${escapeHtml(title)}</p>
-                        <div style="display:flex; gap: 16px; flex-wrap:wrap; margin-top:12px;">${email ? `<span><i class="fas fa-envelope"></i> ${escapeHtml(email)}</span>` : ''} ${phone ? `<span><i class="fas fa-phone"></i> ${escapeHtml(phone)}</span>` : ''} ${location ? `<span><i class="fas fa-map-pin"></i> ${escapeHtml(location)}</span>` : ''}</div>
+                html = `<div class="layout-modern" style="padding:0;">
+                    <div style="background: linear-gradient(105deg, #0b1120 0%, #1a2639 100%); color:white; padding: 32px; border-radius: 32px; margin-bottom: 24px;">
+                        <h2 style="font-size:2.4rem; font-weight:800;">${escapeHtml(name)}</h2>
+                        <p style="color:#94a3f0; font-size:1.1rem;">${escapeHtml(title)}</p>
+                        <div style="display:flex; gap: 14px; flex-wrap:wrap; margin: 12px 0 4px;">${contactRow}</div>
+                        <div style="display:flex; gap: 14px; flex-wrap:wrap;">${socialRow}</div>
                     </div>
-                    <div style="padding:0 10px;"><h3><i class="fas fa-user"></i> Profile</h3><p>${escapeHtml(summary)}</p>
-                    <h3><i class="fas fa-cogs"></i> Skills</h3><div style="display:flex; flex-wrap:wrap; gap:8px;">${skillsArray.map(s => `<span style="background:#e2e8f0; padding:4px 12px; border-radius:20px;">${escapeHtml(s)}</span>`).join('')}</div>
-                    ${expHtml ? `<h3><i class="fas fa-briefcase"></i> Experience</h3>${expHtml}` : ''}
-                    ${eduHtml ? `<h3><i class="fas fa-graduation-cap"></i> Education</h3>${eduHtml}` : ''}
+                    <div style="padding:0 12px;"><h3 style="border-left:4px solid #3b82f6; padding-left:12px;">✨ Profile</h3><p style="margin:12px 0;">${escapeHtml(summary)}</p>
+                    <h3 style="border-left:4px solid #3b82f6; padding-left:12px;">🛠️ Core Skills</h3><div style="display:flex; flex-wrap:wrap; gap:10px; margin:10px 0;">${skillsArray.map(s => `<span style="background:#eef2ff; padding:6px 16px; border-radius:40px; font-weight:500;">${escapeHtml(s)}</span>`).join('')}</div>
+                    ${expHtml ? `<h3 style="border-left:4px solid #3b82f6; padding-left:12px;">💼 Experience</h3><div>${expHtml}</div>` : ''}
+                    ${eduHtml ? `<h3 style="border-left:4px solid #3b82f6; padding-left:12px;">🎓 Education</h3><div>${eduHtml}</div>` : ''}
+                    ${langHtml} ${certHtml}
                     </div>`;
             }
             else if (currentLayout === 'minimal') {
-                html = `<div class="layout-minimal" style="border:1px solid #e2e8f0; border-radius:16px; padding:28px;">
-                        <h1 style="font-size:2rem; border-bottom:2px solid #333; display:inline-block;">${escapeHtml(name)}</h1>
-                        <p style="color:#475569;">${escapeHtml(title)}</p>
-                        <div style="margin:12px 0;">${email} | ${phone} | ${location}</div>
-                        <hr><h4>Summary</h4><p>${escapeHtml(summary)}</p>
-                        <h4>Skills</h4><div>${skillsArray.join(' • ')}</div>
-                        ${expHtml ? `<h4>Work Experience</h4>${expHtml}` : ''}
-                        ${eduHtml ? `<h4>Education</h4>${eduHtml}` : ''}
-                    </div>`;
+                html = `<div class="layout-minimal" style="border:1px solid #e2e8f0; border-radius:20px; padding:28px;">
+                    <h1 style="font-size:2rem; font-weight:700;">${escapeHtml(name)}</h1>
+                    <p style="color:#2c3e66;">${escapeHtml(title)}</p>
+                    <div style="margin:12px 0;">${contactRow} | ${socialRow}</div>
+                    <hr><h4>Summary</h4><p>${escapeHtml(summary)}</p>
+                    <h4>Skills</h4><div>${skillsArray.join(' • ')}</div>
+                    ${expHtml ? `<h4>Work History</h4>${expHtml}` : ''}
+                    ${eduHtml ? `<h4>Education</h4>${eduHtml}` : ''}
+                    ${langHtml} ${certHtml}
+                </div>`;
             }
             else { // elegant
-                html = `<div class="layout-elegant" style="background:#fefaf5; padding:32px; border-radius: 28px; box-shadow: 0 8px 20px rgba(0,0,0,0.05);">
-                        <div style="text-align:center; border-bottom: 2px solid #d4a373;"><h2 style="color:#7f4f24;">${escapeHtml(name)}</h2><p><i>${escapeHtml(title)}</i></p><div>${email} • ${phone} • ${location}</div></div>
-                        <div style="margin-top:20px;"><h3 style="color:#b5835a;">✦ Professional Summary</h3><p>${escapeHtml(summary)}</p>
-                        <h3 style="color:#b5835a;">✦ Core Competencies</h3><div>${skillsArray.map(s => `<span style="display:inline-block; background:#f0e3d5; margin:4px; padding:4px 12px; border-radius:40px;">${escapeHtml(s)}</span>`).join('')}</div>
-                        ${expHtml ? `<h3>✦ Work Journey</h3>${expHtml}` : ''}
-                        ${eduHtml ? `<h3>✦ Academic Path</h3>${eduHtml}` : ''}
-                        </div>
-                    </div>`;
+                html = `<div class="layout-elegant" style="background:#fef9f0; padding:32px; border-radius:28px; box-shadow:0 15px 30px rgba(0,0,0,0.05);">
+                    <div style="text-align:center; border-bottom:2px solid #d4a373; padding-bottom:12px;"><h2 style="color:#7f4f24; font-family:'Georgia';">${escapeHtml(name)}</h2><p style="font-style:italic;">${escapeHtml(title)}</p><div style="font-size:0.8rem;">${contactRow}</div><div style="font-size:0.75rem;">${socialRow}</div></div>
+                    <div style="margin-top:20px;"><h3 style="color:#b5835a;">✦ Professional Summary</h3><p>${escapeHtml(summary)}</p>
+                    <h3 style="color:#b5835a;">✦ Expertise</h3><div>${skillsArray.map(s => `<span style="background:#f0e3d5; display:inline-block; margin:4px; padding:5px 14px; border-radius:40px;">${escapeHtml(s)}</span>`).join('')}</div>
+                    ${expHtml ? `<h3>✦ Career Path</h3>${expHtml}` : ''}
+                    ${eduHtml ? `<h3>✦ Academic</h3>${eduHtml}` : ''}
+                    ${langHtml} ${certHtml}</div>
+                </div>`;
             }
-            html += `</div>`;
             document.getElementById('resumeLivePreview').innerHTML = html;
         }
 
-        // PDF Download with current layout
+        // PDF download - preserve functionality
         async function downloadResumePDF() {
             const element = document.getElementById('resumeLivePreview');
             const btn = document.getElementById('downloadPdfBtn');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Generating...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Generating PDF...';
             btn.disabled = true;
             const opt = { margin: 0.5, filename: `Resume_${document.getElementById('fullName')?.value || 'Candidate'}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } };
-            try { await html2pdf().set(opt).from(element).save(); } catch (e) { alert('Error generating PDF'); }
+            try { await html2pdf().set(opt).from(element).save(); } catch (e) { alert('Oops! PDF error, but your resume looks amazing.'); }
             btn.innerHTML = originalText;
             btn.disabled = false;
         }
@@ -567,8 +635,12 @@
             if (document.getElementById('email')) document.getElementById('email').value = '';
             if (document.getElementById('phone')) document.getElementById('phone').value = '';
             if (document.getElementById('location')) document.getElementById('location').value = '';
+            if (document.getElementById('linkedin')) document.getElementById('linkedin').value = '';
+            if (document.getElementById('github')) document.getElementById('github').value = '';
             if (document.getElementById('summary')) document.getElementById('summary').value = '';
             if (document.getElementById('skillsInput')) document.getElementById('skillsInput').value = '';
+            if (document.getElementById('languages')) document.getElementById('languages').value = '';
+            if (document.getElementById('certifications')) document.getElementById('certifications').value = '';
             dynamicSections = [];
             renderFormSections();
             renderResumePreview();
@@ -576,7 +648,7 @@
 
         function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, function (m) { if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m; }); }
 
-        // layout selector
+        // Layout switcher
         document.querySelectorAll('.layout-btn').forEach(btn => {
             btn.addEventListener('click', function () {
                 document.querySelectorAll('.layout-btn').forEach(b => b.classList.remove('active'));
@@ -586,6 +658,7 @@
             });
         });
 
+        // Expose functions
         window.applyAISuggestion = applyAISuggestion;
         window.suggestSkills = suggestSkills;
         window.addNewSection = addNewSection;
@@ -595,8 +668,8 @@
 
         document.getElementById('downloadPdfBtn')?.addEventListener('click', downloadResumePDF);
         document.getElementById('resetAllBtn')?.addEventListener('click', resetAllData);
+        document.getElementById('dashboardBtn')?.addEventListener('click', () => { window.location.href = "main.html"; });
 
-        // initial render
         attachGlobalInputs();
         renderFormSections();
         renderResumePreview();

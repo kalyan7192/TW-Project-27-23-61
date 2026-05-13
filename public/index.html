@@ -58,6 +58,30 @@
             }
         }
 
+        /* ===== NEW TITLE STYLE ===== */
+        .main-title {
+            position: absolute;
+            top: 40px;
+            color: #fff;
+            font-size: 42px;
+            font-weight: bold;
+            text-align: center;
+            letter-spacing: 1px;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+            animation: glow 2s infinite alternate;
+            z-index: 10;
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 10px #00dbde, 0 0 20px #00dbde;
+            }
+
+            to {
+                text-shadow: 0 0 20px #fc00ff, 0 0 40px #fc00ff;
+            }
+        }
+
         .custom-popup {
             position: fixed;
             top: 50%;
@@ -286,13 +310,24 @@
             .container.active .login {
                 display: none;
             }
+
+            .main-title {
+                font-size: 28px;
+                top: 20px;
+                text-align: center;
+                padding: 0 10px;
+            }
         }
     </style>
 </head>
 
 <body>
 
+    <!-- ===== NEW TITLE ADDED ===== -->
+    <h6 class="main-title">Welcome</h6>
+
     <div class="container" id="container">
+
         <div class="form-box login">
             <h2>Login</h2>
             <div class="input-box">
@@ -319,7 +354,7 @@
         </div>
 
         <div class="toggle-box">
-            <h1>Welcome... User !</h1>
+            <h1>Hello User !</h1>
             <button class="toggle-btn" id="toggle">Create Account</button>
         </div>
     </div>
@@ -331,7 +366,6 @@
 
     <script>
         // ========== IMPORTANT: REPLACE WITH YOUR ACTUAL RENDER BACKEND URL ==========
-        // Example: const API_BASE_URL = "https://sticky-notes-backend.onrender.com";
         const API_BASE_URL = "https://tw-backend-rdqe.onrender.com";
         // ============================================================================
 
