@@ -13,10 +13,7 @@ app.use(express.json());
 // Enhanced CORS configuration for Render deployment
 app.use(cors({
     origin: [
-        'https://tw-project-27-23-61.onrender.com',  // Your frontend URL
-        'http://localhost:3000',
-        'http://localhost:5500',
-        'http://127.0.0.1:5500'
+        'https://tw-project-27-23-61.onrender.com'
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

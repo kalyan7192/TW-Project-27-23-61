@@ -7,7 +7,6 @@
     <title>Login & Signup</title>
 
     <style>
-        /* Your existing styles (keep as is) */
         * {
             margin: 0;
             padding: 0;
@@ -59,7 +58,6 @@
             }
         }
 
-        /* Custom Popup Styles */
         .custom-popup {
             position: fixed;
             top: 50%;
@@ -240,11 +238,6 @@
             margin-bottom: 15px;
         }
 
-        .toggle-box p {
-            margin-bottom: 25px;
-            font-size: 15px;
-        }
-
         .toggle-btn {
             padding: 12px 35px;
             border: 2px solid #fff;
@@ -300,8 +293,6 @@
 <body>
 
     <div class="container" id="container">
-
-        <!-- Login Form -->
         <div class="form-box login">
             <h2>Login</h2>
             <div class="input-box">
@@ -313,7 +304,6 @@
             <button class="btn" id="loginBtn">Login</button>
         </div>
 
-        <!-- Signup Form -->
         <div class="form-box signup">
             <h2>Create Account</h2>
             <div class="input-box">
@@ -328,26 +318,22 @@
             <button class="btn" id="signupBtn">Sign Up</button>
         </div>
 
-        <!-- Toggle Panel -->
         <div class="toggle-box">
             <h1>Welcome... User !</h1>
-            <button class="toggle-btn" id="toggle">
-                Create Account
-            </button>
+            <button class="toggle-btn" id="toggle">Create Account</button>
         </div>
-
     </div>
 
-    <!-- Custom Popup -->
     <div id="customPopup" class="custom-popup">
         <p id="popupMessage"></p>
         <button onclick="closePopup()">OK</button>
     </div>
 
     <script>
-        // ========== IMPORTANT: UPDATE THIS WITH YOUR RENDER BACKEND URL ==========
-        const API_BASE_URL = "https://tw-project-27-23-61.onrender.com"; // Change this!
-        // =========================================================================
+        // ========== IMPORTANT: REPLACE WITH YOUR ACTUAL RENDER BACKEND URL ==========
+        // Example: const API_BASE_URL = "https://sticky-notes-backend.onrender.com";
+        const API_BASE_URL = "https://YOUR-BACKEND-URL-HERE.onrender.com";
+        // ============================================================================
 
         const container = document.getElementById('container');
         const toggleBtn = document.getElementById('toggle');
@@ -377,23 +363,7 @@
             toggleBtn.innerText = signupMode ? "Back to Login" : "Create Account";
         });
 
-        async function apiCall(endpoint, data) {
-            const url = `${API_BASE_URL}${endpoint}`;
-            try {
-                const response = await fetch(url, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(data)
-                });
-
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                return await response.json();
-            } catch (error) {
-                console.error("API Error:", error);
-                throw new Error("Cannot connect to server");
-            }
-        }
-
+        // Signup Function
         document.getElementById("signupBtn").addEventListener("click", async () => {
             const name = document.getElementById("signupName").value.trim();
             const username = document.getElementById("signupUsername").value.trim();
@@ -405,11 +375,18 @@
             }
 
             const btn = document.getElementById("signupBtn");
+            const originalText = btn.innerText;
             btn.innerText = "Creating...";
             btn.disabled = true;
 
             try {
-                const data = await apiCall("/signup", { name, username, password });
+                const response = await fetch(`${API_BASE_URL}/signup`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name, username, password })
+                });
+
+                const data = await response.json();
                 showPopup(data.message, data.success ? "success" : "error");
 
                 if (data.success) {
@@ -421,13 +398,15 @@
                     toggleBtn.innerText = "Create Account";
                 }
             } catch (error) {
-                showPopup(error.message, "error");
+                console.error("Signup error:", error);
+                showPopup("Cannot connect to server. Please check if backend is running.", "error");
             } finally {
-                btn.innerText = "Sign Up";
+                btn.innerText = originalText;
                 btn.disabled = false;
             }
         });
 
+        // Login Function
         document.getElementById("loginBtn").addEventListener("click", async () => {
             const username = document.getElementById("loginUsername").value.trim();
             const password = document.getElementById("loginPassword").value;
@@ -438,11 +417,18 @@
             }
 
             const btn = document.getElementById("loginBtn");
+            const originalText = btn.innerText;
             btn.innerText = "Logging in...";
             btn.disabled = true;
 
             try {
-                const data = await apiCall("/login", { username, password });
+                const response = await fetch(`${API_BASE_URL}/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
 
                 if (data.success) {
                     localStorage.setItem("loggedInUser", data.user.name);
@@ -455,9 +441,10 @@
                     showPopup(data.message, "error");
                 }
             } catch (error) {
-                showPopup(error.message, "error");
+                console.error("Login error:", error);
+                showPopup("Cannot connect to server. Please check if backend is running.", "error");
             } finally {
-                btn.innerText = "Login";
+                btn.innerText = originalText;
                 btn.disabled = false;
             }
         });
