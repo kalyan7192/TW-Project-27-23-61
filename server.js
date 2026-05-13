@@ -135,7 +135,7 @@ app.post("/signup", async (req, res) => {
 
 // ================= LOGIN =================
 
-app.post("https://tw-project-27-23-61.onrender.com/login", async (req, res) => {
+app.post("/login", async (req, res) => {
     try {
         const { username, password } = req.body;
 
