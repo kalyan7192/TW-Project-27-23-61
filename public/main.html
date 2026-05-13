@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f172a, #111827, #1e293b);
+            overflow-x: hidden;
+            position: relative;
+            color: white;
+        }
+
+        /* Animated Background */
+        body::before,
+        body::after {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            filter: blur(90px);
+            z-index: 0;
+            animation: float 8s infinite alternate ease-in-out;
+        }
+
+        body::before {
+            background: rgba(0, 255, 255, 0.15);
+            top: -150px;
+            left: -150px;
+        }
+
+        body::after {
+            background: rgba(255, 0, 255, 0.15);
+            bottom: -150px;
+            right: -150px;
+            animation-delay: 3s;
+        }
+
+        @keyframes float {
+            from {
+                transform: translateY(0px) translateX(0px);
+            }
+
+            to {
+                transform: translateY(40px) translateX(30px);
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            padding: 30px 60px;
+        }
+
+        /* Navbar */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 60px;
+        }
+
+        .logo {
+            font-size: 30px;
+            font-weight: bold;
+            background: linear-gradient(90deg, #00dbde, #fc00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logout-btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(90deg, #ff4b2b, #ff416c);
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.4s;
+            font-weight: bold;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(255, 65, 108, 0.4);
+        }
+
+        /* Welcome */
+        .welcome-section {
+            margin-bottom: 50px;
+            animation: fadeIn 1s ease;
+        }
+
+        .welcome-section h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .welcome-section span {
+            background: linear-gradient(90deg, #00dbde, #fc00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .welcome-section p {
+            color: #cbd5e1;
+            font-size: 18px;
+        }
+
+        /* Cards */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            position: relative;
+            height: 230px;
+            border-radius: 25px;
+            padding: 30px;
+            cursor: pointer;
+            overflow: hidden;
+            transition: 0.5s;
+
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 20px 40px rgba(0, 255, 255, 0.25);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg,
+                    rgba(255, 255, 255, 0.08),
+                    transparent,
+                    rgba(255, 255, 255, 0.08));
+            transform: rotate(45deg);
+            top: -150%;
+            left: -150%;
+            transition: 0.8s;
+        }
+
+        .card:hover::before {
+            top: 100%;
+            left: 100%;
+        }
+
+        .card-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .card p {
+            color: #cbd5e1;
+            text-align: center;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* Different Glow Effects */
+        .resume:hover {
+            box-shadow: 0 20px 40px rgba(0, 255, 255, 0.35);
+        }
+
+        .notes:hover {
+            box-shadow: 0 20px 40px rgba(255, 0, 255, 0.35);
+        }
+
+        .tasks:hover {
+            box-shadow: 0 20px 40px rgba(255, 255, 0, 0.35);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media(max-width:768px) {
+
+            .container {
+                padding: 25px;
+            }
+
+            .welcome-section h1 {
+                font-size: 34px;
+            }
+
+            .navbar {
+                flex-direction: column;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- Navbar -->
+        <div class="navbar">
+
+            <div class="logo">
+                My Dashboard
+            </div>
+
+            <button class="logout-btn" id="logoutBtn">
+                Logout
+            </button>
+
+        </div>
+
+        <!-- Welcome -->
+        <div class="welcome-section">
+
+            <h1>
+                Welcome,
+                <span id="username"></span> 👋
+            </h1>
+
+            <p>
+                Manage your productivity tools beautifully and efficiently.
+            </p>
+
+        </div>
+
+        <!-- Cards -->
+        <div class="cards">
+
+            <!-- Resume -->
+            <div class="card resume" onclick="goToResume()">
+
+                <div class="card-icon">
+                    📄
+                </div>
+
+                <h2>Build Your Resume</h2>
+
+                <p>
+                    Create stunning professional resumes with modern layouts.
+                </p>
+
+            </div>
+
+            <!-- Sticky Notes -->
+            <div class="card notes" onclick="goToNotes()">
+
+                <div class="card-icon">
+                    📝
+                </div>
+
+                <h2>Create Sticky Notes</h2>
+
+                <p>
+                    Save your quick ideas, reminders, and important notes.
+                </p>
+
+            </div>
+
+            <!-- Tasks -->
+            <div class="card tasks" onclick="goToTasks()">
+
+                <div class="card-icon">
+                    ✅
+                </div>
+
+                <h2>Create Your Tasks</h2>
+
+                <p>
+                    Organize your tasks and track daily productivity goals.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        // GET USERNAME FROM LOCAL STORAGE
+        const loggedInUser = localStorage.getItem("loggedInUser");
+
+        // SHOW USERNAME
+        if (loggedInUser) {
+
+            document.getElementById("username").innerText = loggedInUser;
+
+        } else {
+
+            // IF USER NOT LOGGED IN
+            window.location.href = "index.html";
+        }
+
+
+        // REDIRECT FUNCTIONS
+
+        function goToResume() {
+            window.location.href = "resume.html";
+        }
+
+        function goToNotes() {
+            window.location.href = "stickynotes.html";
+        }
+
+        function goToTasks() {
+            window.location.href = "tasks.html";
+        }
+
+
+        // LOGOUT BUTTON
+
+        document.getElementById("logoutBtn").addEventListener("click", () => {
+
+            // REMOVE USER DATA
+            localStorage.removeItem("loggedInUser");
+
+            // REDIRECT TO LOGIN PAGE
+            window.location.href = "index.html";
+        });
+
+    </script>
+
+</body>
+
+</html>

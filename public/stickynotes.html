@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Nebula Notes · Multi-Select Sticky Tasks</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            overflow: hidden;
+            background: radial-gradient(circle at 20% 30%, #0a0f2a, #030614);
+            color: white;
+            position: relative;
+        }
+
+        /* animated gradient orbs */
+        body::before,
+        body::after {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: 0;
+            animation: floatGlow 18s infinite alternate;
+        }
+
+        body::before {
+            background: rgba(0, 255, 255, 0.2);
+            top: -200px;
+            left: -200px;
+        }
+
+        body::after {
+            background: rgba(255, 0, 200, 0.2);
+            bottom: -200px;
+            right: -200px;
+            animation-delay: -5s;
+        }
+
+        @keyframes floatGlow {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: translate(80px, 60px) scale(1.3);
+                opacity: 0.8;
+            }
+        }
+
+        /* toolbar */
+        .toolbar {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            flex-wrap: wrap;
+            backdrop-filter: blur(12px);
+            background: rgba(10, 20, 35, 0.5);
+            padding: 10px 20px;
+            border-radius: 60px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        #noteText {
+            width: 240px;
+            height: 46px;
+            border: none;
+            outline: none;
+            border-radius: 40px;
+            padding: 0 18px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            color: white;
+            font-weight: 400;
+            transition: 0.2s;
+        }
+
+        #noteText:focus {
+            border-color: #00ffff;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        #noteText::placeholder {
+            color: #a0b3d9;
+        }
+
+        .toolbar-btn {
+            padding: 10px 22px;
+            border: none;
+            border-radius: 40px;
+            background: linear-gradient(105deg, #2b3b6e, #1a2745);
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            letter-spacing: 0.3px;
+            font-size: 0.9rem;
+        }
+
+        .toolbar-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        /* Unique Action Buttons */
+        .action-group {
+            display: flex;
+            gap: 8px;
+            margin-left: 8px;
+            padding-left: 12px;
+            border-left: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .unique-action-btn {
+            position: relative;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            backdrop-filter: blur(12px);
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(20, 30, 55, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #e0e7ff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .unique-action-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            filter: brightness(1.15);
+        }
+
+        .select-unique {
+            background: linear-gradient(135deg, rgba(156, 39, 176, 0.8), rgba(103, 58, 183, 0.9));
+            border-left: 3px solid #e040fb;
+        }
+
+        .select-unique::before {
+            content: "🔘";
+            font-size: 1rem;
+        }
+
+        .complete-unique {
+            background: linear-gradient(135deg, rgba(46, 204, 113, 0.7), rgba(39, 174, 96, 0.9));
+            border-left: 3px solid #2ecc71;
+        }
+
+        .complete-unique::before {
+            content: "✔️";
+            font-size: 1rem;
+        }
+
+        .delete-unique {
+            background: linear-gradient(135deg, rgba(231, 76, 60, 0.7), rgba(192, 57, 43, 0.9));
+            border-left: 3px solid #e74c3c;
+        }
+
+        .delete-unique::before {
+            content: "🗑️";
+            font-size: 1rem;
+        }
+
+        .share-unique {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.7), rgba(41, 128, 185, 0.9));
+            border-left: 3px solid #3498db;
+        }
+
+        .share-unique::before {
+            content: "📤";
+            font-size: 1rem;
+        }
+
+        .cancel-unique {
+            background: linear-gradient(135deg, rgba(241, 76, 66, 0.9), rgba(200, 50, 40, 0.95));
+            border-left: 3px solid #ff6b6b;
+            display: none;
+        }
+
+        .cancel-unique::before {
+            content: "✖️";
+            font-size: 1rem;
+        }
+
+        .unique-action-btn.disabled-action {
+            opacity: 0.45;
+            filter: grayscale(0.3);
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .unique-action-btn.enabled-action {
+            opacity: 1;
+            cursor: pointer;
+            pointer-events: auto;
+        }
+
+        /* notes area */
+        #notesArea {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        .note {
+            position: absolute;
+            width: 280px;
+            min-height: 170px;
+            padding: 22px 20px 20px 20px;
+            border-radius: 28px;
+            background: rgba(18, 28, 48, 0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.4);
+            cursor: grab;
+            transition: 0.2s ease;
+            animation: noteRise 0.35s cubic-bezier(0.2, 0.9, 0.5, 1.1);
+        }
+
+        .note.selected {
+            border: 2px solid #00f2fe;
+            box-shadow: 0 0 0 3px rgba(0, 242, 254, 0.5);
+            background: rgba(30, 50, 80, 0.9);
+        }
+
+        .note.dragging-disabled {
+            cursor: pointer;
+        }
+
+        .note:hover {
+            transform: translateY(-4px);
+            border-color: rgba(0, 255, 255, 0.5);
+        }
+
+        .check-indicator {
+            position: absolute;
+            top: 14px;
+            left: 16px;
+            width: 24px;
+            height: 24px;
+            border-radius: 30px;
+            background: #00f2fe;
+            color: #0a0f2a;
+            font-weight: bold;
+            text-align: center;
+            font-size: 14px;
+            line-height: 24px;
+            display: none;
+            box-shadow: 0 0 6px cyan;
+        }
+
+        .note.selected .check-indicator {
+            display: block;
+        }
+
+        .note p {
+            line-height: 1.55;
+            margin: 8px 0;
+            color: #f0f3ff;
+            font-size: 0.9rem;
+        }
+
+        /* Popups */
+        .completed-popup,
+        .share-modal,
+        .receive-task-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15, 25, 45, 0.98);
+            backdrop-filter: blur(28px);
+            border-radius: 36px;
+            padding: 28px;
+            z-index: 9999;
+            display: none;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 460px;
+            max-width: 90%;
+            max-height: 70vh;
+            overflow-y: auto;
+            box-shadow: 0 40px 70px black;
+        }
+
+        .completed-popup h2,
+        .share-card h3,
+        .receive-task-popup h3 {
+            margin-bottom: 20px;
+            font-size: 26px;
+            background: linear-gradient(135deg, #b6f0ff, #c084fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .completed-task {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            margin-bottom: 12px;
+            border-left: 4px solid #2ecc71;
+        }
+
+        .close-popup {
+            margin-top: 18px;
+            width: 100%;
+            padding: 12px;
+            border-radius: 40px;
+            background: linear-gradient(90deg, #00dbde, #fc00ff);
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .share-card,
+        .receive-card {
+            background: rgba(10, 20, 40, 0.96);
+            border-radius: 40px;
+            padding: 26px;
+            width: 380px;
+        }
+
+        .share-card input,
+        .receive-card input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            margin: 15px 0;
+            outline: none;
+        }
+
+        .share-actions,
+        .receive-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .confirm-share,
+        .accept-task-btn {
+            background: #2ecc71;
+            border: none;
+            padding: 12px;
+            border-radius: 40px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .cancel-share,
+        .reject-task-btn {
+            background: #e74c3c;
+            border: none;
+            flex: 1;
+            border-radius: 40px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+        }
+
+        .pending-task-item {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3498db;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .pending-task-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+
+        .task-from {
+            font-size: 12px;
+            color: #a0b3d9;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .task-text-preview {
+            font-size: 14px;
+            font-weight: 500;
+            margin-top: 5px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(16px);
+            padding: 14px 24px;
+            border-radius: 60px;
+            border-left: 5px solid #2ecc71;
+            z-index: 12000;
+            animation: fadeSlide 0.3s ease;
+            display: flex;
+            gap: 20px;
+            color: white;
+            font-weight: 500;
+        }
+
+        @keyframes noteRise {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateX(80px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* new feature: stats bar */
+        .stats-bar {
+            position: fixed;
+            bottom: 25px;
+            left: 25px;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(12px);
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-size: 13px;
+            display: flex;
+            gap: 20px;
+            z-index: 1000;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            font-weight: 500;
+        }
+
+        .stats-bar span {
+            color: #00f2fe;
+            font-weight: bold;
+        }
+
+        @media (max-width: 900px) {
+            .toolbar {
+                gap: 8px;
+                padding: 8px 16px;
+            }
+
+            .unique-action-btn {
+                padding: 6px 12px;
+                font-size: 0.75rem;
+            }
+
+            .stats-bar {
+                font-size: 10px;
+                gap: 12px;
+                padding: 6px 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="toolbar">
+        <textarea id="noteText" placeholder="✍️ Write your brilliant idea..."></textarea>
+        <button class="toolbar-btn" onclick="addNote()">✨ Add Task</button>
+        <button class="toolbar-btn" onclick="showCompletedTasks()">🏆 Completed</button>
+        <button class="toolbar-btn" onclick="goBack()">🌙 Dashboard</button>
+
+        <div class="action-group">
+            <button id="selectUniqueBtn" class="unique-action-btn select-unique"> Select</button>
+            <button id="completeUniqueBtn" class="unique-action-btn complete-unique disabled-action" disabled>
+                Complete</button>
+            <button id="deleteUniqueBtn" class="unique-action-btn delete-unique disabled-action" disabled>
+                Delete</button>
+            <button id="shareUniqueBtn" class="unique-action-btn share-unique disabled-action" disabled> Share</button>
+            <button id="cancelUniqueBtn" class="unique-action-btn cancel-unique"> Cancel</button>
+        </div>
+    </div>
+
+    <div id="notesArea"></div>
+
+    <!-- Stats Bar - New Feature -->
+    <div class="stats-bar" id="statsBar">
+        <div>📋 Total Tasks: <span id="totalTasks">0</span></div>
+        <div>✅ Completed: <span id="completedCount">0</span></div>
+        <div>⭐ Pending: <span id="pendingCount">0</span></div>
+    </div>
+
+    <!-- Completed popup -->
+    <div class="completed-popup" id="completedPopup">
+        <h2>✅ Completed Masterpieces</h2>
+        <div id="completedContainer"></div>
+        <button class="close-popup" onclick="closePopup()">Close</button>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="shareModal" class="share-modal" style="display: none;">
+        <div class="share-card">
+            <h3>🔁 Share Selected Task(s)</h3>
+            <div id="shareTasksPreview"
+                style="background:#00000040; border-radius: 20px; padding: 12px; margin: 8px 0; font-size: 13px;"></div>
+            <input type="text" id="shareTargetUser" placeholder="Receiver username" autocomplete="off">
+            <div class="share-actions">
+                <button class="confirm-share" id="confirmShareBtn">Share</button>
+                <button class="cancel-share" id="cancelShareModalBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receive Task Popup (replaces alert box) -->
+    <div id="receiveTaskPopup" class="receive-task-popup" style="display: none;">
+        <div class="receive-card">
+            <h3>📬 New Shared Task</h3>
+            <div id="receiveTaskContent"></div>
+            <div class="receive-actions">
+                <button class="accept-task-btn" id="acceptTaskBtn">✅ Accept</button>
+                <button class="reject-task-btn" id="rejectTaskBtn">❌ Reject</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const username = localStorage.getItem("loggedInUsername");
+        if (!username) window.location.href = "index.html";
+
+        let notesData = [];
+        let noteElementsMap = new Map();
+        let selectedNoteIds = new Set();
+        let isSelectModeActive = false;
+        let pendingShareRequest = null; // store incoming task for popup
+
+        // DOM elements
+        const selectUniqueBtn = document.getElementById("selectUniqueBtn");
+        const completeUniqueBtn = document.getElementById("completeUniqueBtn");
+        const deleteUniqueBtn = document.getElementById("deleteUniqueBtn");
+        const shareUniqueBtn = document.getElementById("shareUniqueBtn");
+        const cancelUniqueBtn = document.getElementById("cancelUniqueBtn");
+
+        function showToast(message, isError = false) {
+            let existing = document.querySelector('.toast');
+            if (existing) existing.remove();
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.style.borderLeftColor = isError ? '#e74c3c' : '#2ecc71';
+            toast.innerHTML = `<span>${message}</span><button style="background: none; border:none; color:white; font-weight:bold; cursor:pointer; margin-left:12px;" onclick="this.parentElement.remove()">OK</button>`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast?.remove(), 3000);
+        }
+
+        async function loadNotes() {
+            try {
+                const response = await fetch(`http://localhost:5000/get-notes/${username}`);
+                const notes = await response.json();
+                notesData = notes;
+                notesArea.innerHTML = "";
+                noteElementsMap.clear();
+                notes.forEach(note => createNoteElement(note));
+                updateUniqueButtonsState();
+                updateStats();
+            } catch (err) { console.error(err); showToast("Failed to load notes", true); }
+        }
+
+        function updateStats() {
+            document.getElementById("totalTasks").innerText = notesData.length;
+            // Note: completed tasks are stored separately on backend, but we can show pending = total
+            // For better UX, we just show total tasks count
+            document.getElementById("pendingCount").innerText = notesData.length;
+            document.getElementById("completedCount").innerText = "?";
+            // fetch completed count separately
+            fetch(`http://localhost:5000/completed-notes/${username}`).then(res => res.json()).then(completed => {
+                document.getElementById("completedCount").innerText = completed.length;
+                document.getElementById("pendingCount").innerText = notesData.length;
+            }).catch(e => console.log(e));
+        }
+
+        function createNoteElement(note) {
+            const noteDiv = document.createElement("div");
+            noteDiv.classList.add("note");
+            noteDiv.setAttribute("data-id", note._id);
+            noteDiv.style.left = note.x + "px";
+            noteDiv.style.top = note.y + "px";
+            noteDiv.innerHTML = `<div class="check-indicator">✓</div><p>${escapeHtml(note.text)}</p>`;
+            notesArea.appendChild(noteDiv);
+            noteElementsMap.set(note._id, noteDiv);
+
+            noteDiv.addEventListener("click", (e) => { if (isSelectModeActive) { e.stopPropagation(); toggleNoteSelection(note._id); } });
+
+            let isDragging = false, offsetX, offsetY;
+            function onMouseDown(e) { if (isSelectModeActive) return; isDragging = true; offsetX = e.clientX - noteDiv.offsetLeft; offsetY = e.clientY - noteDiv.offsetTop; noteDiv.style.cursor = "grabbing"; noteDiv.style.transition = "none"; e.preventDefault(); }
+            function onMouseMove(e) { if (!isDragging || isSelectModeActive) return; let x = e.clientX - offsetX; let y = e.clientY - offsetY; x = Math.min(Math.max(x, 0), window.innerWidth - noteDiv.offsetWidth); y = Math.min(Math.max(y, 0), window.innerHeight - noteDiv.offsetHeight); noteDiv.style.left = x + "px"; noteDiv.style.top = y + "px"; }
+            async function onMouseUp() { if (isDragging && !isSelectModeActive) { isDragging = false; noteDiv.style.cursor = "grab"; noteDiv.style.transition = ""; await fetch(`http://localhost:5000/move-note/${note._id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ x: parseInt(noteDiv.style.left), y: parseInt(noteDiv.style.top) }) }); } isDragging = false; }
+            noteDiv.addEventListener("mousedown", onMouseDown);
+            document.addEventListener("mousemove", onMouseMove);
+            document.addEventListener("mouseup", onMouseUp);
+            updateNoteDragCapability(noteDiv);
+            if (selectedNoteIds.has(note._id)) noteDiv.classList.add("selected");
+        }
+
+        function updateNoteDragCapability(noteDiv) {
+            if (isSelectModeActive) { noteDiv.style.cursor = "pointer"; noteDiv.classList.add("dragging-disabled"); }
+            else { noteDiv.style.cursor = "grab"; noteDiv.classList.remove("dragging-disabled"); }
+        }
+
+        function toggleNoteSelection(id) { if (!isSelectModeActive) return; const div = noteElementsMap.get(id); if (selectedNoteIds.has(id)) { selectedNoteIds.delete(id); div.classList.remove("selected"); } else { selectedNoteIds.add(id); div.classList.add("selected"); } updateUniqueButtonsState(); }
+
+        function updateUniqueButtonsState() { const hasSelected = selectedNoteIds.size > 0;[completeUniqueBtn, deleteUniqueBtn, shareUniqueBtn].forEach(btn => { if (hasSelected && isSelectModeActive) { btn.disabled = false; btn.classList.remove("disabled-action"); btn.classList.add("enabled-action"); } else { btn.disabled = true; btn.classList.remove("enabled-action"); btn.classList.add("disabled-action"); } }); }
+
+        function enableSelectMode() { if (isSelectModeActive) return; isSelectModeActive = true; selectedNoteIds.clear(); document.querySelectorAll('.note').forEach(n => n.classList.remove('selected')); selectUniqueBtn.style.display = "none"; cancelUniqueBtn.style.display = "flex"; for (let div of noteElementsMap.values()) { div.style.cursor = "pointer"; div.classList.add("dragging-disabled"); } updateUniqueButtonsState(); showToast("✅ Selection mode ON", false); }
+
+        function exitSelectMode() { if (!isSelectModeActive) return; isSelectModeActive = false; selectedNoteIds.clear(); for (let div of noteElementsMap.values()) { div.classList.remove("selected"); div.style.cursor = "grab"; div.classList.remove("dragging-disabled"); } selectUniqueBtn.style.display = "flex"; cancelUniqueBtn.style.display = "none"; updateUniqueButtonsState(); showToast("🔓 Selection mode off", false); }
+
+        async function completeSelectedTasks() { if (!isSelectModeActive || selectedNoteIds.size === 0) return; const ids = Array.from(selectedNoteIds); for (let id of ids) await fetch(`http://localhost:5000/complete-note/${id}`, { method: "PUT" }); showToast(`🎉 Completed ${ids.length} task(s)!`, false); exitSelectMode(); loadNotes(); }
+        async function deleteSelectedTasks() { if (!isSelectModeActive || selectedNoteIds.size === 0) return; const ids = Array.from(selectedNoteIds); for (let id of ids) await fetch(`http://localhost:5000/delete-note/${id}`, { method: "DELETE" }); showToast(`🗑️ Deleted ${ids.length} task(s)`, false); exitSelectMode(); loadNotes(); }
+        function shareSelectedTasks() { if (!isSelectModeActive || selectedNoteIds.size === 0) return; const texts = Array.from(selectedNoteIds).map(id => notesData.find(n => n._id === id)?.text).filter(t => t); if (texts.length) openShareModal(texts); }
+
+        let pendingShareTexts = [];
+        function openShareModal(textsArray) { pendingShareTexts = textsArray; const modal = document.getElementById("shareModal"); const previewDiv = document.getElementById("shareTasksPreview"); previewDiv.innerHTML = `<strong>${textsArray.length} task(s):</strong><br>${textsArray.map((t, i) => `${i + 1}. ${t.length > 55 ? t.slice(0, 55) + '…' : t}`).join('<br>')}`; document.getElementById("shareTargetUser").value = ""; modal.style.display = "flex"; }
+        function closeShareModal() { document.getElementById("shareModal").style.display = "none"; pendingShareTexts = []; }
+        async function confirmShareMultiple() { const receiver = document.getElementById("shareTargetUser").value.trim(); if (!receiver) { showToast("Enter username", true); return; } if (!pendingShareTexts.length) return; let success = 0; for (let text of pendingShareTexts) { try { const res = await fetch("http://localhost:5000/share-note", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ fromUser: username, toUser: receiver, text }) }); const data = await res.json(); if (data.success || data.message?.includes("shared")) success++; } catch (e) { } } showToast(`📤 Shared ${success}/${pendingShareTexts.length} tasks`, success === 0); closeShareModal(); if (success > 0) exitSelectMode(); }
+
+        async function addNote() { const text = document.getElementById("noteText").value.trim(); if (!text) { showToast("Write something", true); return; } try { const res = await fetch("http://localhost:5000/add-note", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username, text }) }); const data = await res.json(); if (data.success) { document.getElementById("noteText").value = ""; showToast("✨ Task created!"); loadNotes(); } else showToast("Failed", true); } catch (e) { showToast("Server error", true); } }
+
+        async function showCompletedTasks() { const popup = document.getElementById("completedPopup"); const container = document.getElementById("completedContainer"); try { const res = await fetch(`http://localhost:5000/completed-notes/${username}`); const notes = await res.json(); container.innerHTML = notes.length ? "" : "<div style='padding:20px; text-align:center; opacity:0.7'>No completed tasks</div>"; notes.forEach(note => { const div = document.createElement("div"); div.className = "completed-task"; div.innerText = note.text; container.appendChild(div); }); } catch (e) { container.innerHTML = "<div>Error</div>"; } popup.style.display = "block"; }
+        function closePopup() { document.getElementById("completedPopup").style.display = "none"; }
+        function goBack() { window.location.href = "main.html"; }
+
+        // FIXED: Shared tasks with beautiful popup instead of alert, and prevent duplicate addition
+        let processedTaskIds = new Set(); // track processed tasks to avoid duplicates
+
+        async function checkSharedTasks() {
+            try {
+                const response = await fetch(`http://localhost:5000/shared-tasks/${username}`);
+                const tasks = await response.json();
+                for (let task of tasks) {
+                    // Skip if already processed
+                    if (processedTaskIds.has(task._id)) continue;
+
+                    // Show beautiful popup instead of alert
+                    processedTaskIds.add(task._id);
+                    showReceiveTaskPopup(task);
+                }
+            } catch (error) { console.log(error); }
+        }
+
+        function showReceiveTaskPopup(task) {
+            const popup = document.getElementById("receiveTaskPopup");
+            const contentDiv = document.getElementById("receiveTaskContent");
+            contentDiv.innerHTML = `
+            <div style="background: rgba(0,255,255,0.1); border-radius: 20px; padding: 16px; margin-bottom: 10px;">
+                <div class="task-from">👤 From: <strong>${escapeHtml(task.fromUser)}</strong></div>
+                <div class="task-text-preview" style="font-size: 16px; margin-top: 10px;">📝 "${escapeHtml(task.text.length > 100 ? task.text.slice(0, 100) + '…' : task.text)}"</div>
+            </div>
+        `;
+            popup.style.display = "flex";
+
+            // Store task data for accept/reject
+            const acceptBtn = document.getElementById("acceptTaskBtn");
+            const rejectBtn = document.getElementById("rejectTaskBtn");
+
+            const acceptHandler = async () => {
+                await fetch(`http://localhost:5000/accept-task/${task._id}`, { method: "POST" });
+                showToast(`✨ Task added from ${task.fromUser}!`, false);
+                loadNotes();
+                popup.style.display = "none";
+                cleanup();
+            };
+
+            const rejectHandler = () => {
+                showToast("Task rejected", false);
+                popup.style.display = "none";
+                cleanup();
+            };
+
+            const cleanup = () => {
+                acceptBtn.removeEventListener("click", acceptHandler);
+                rejectBtn.removeEventListener("click", rejectHandler);
+            };
+
+            acceptBtn.removeEventListener("click", acceptHandler);
+            rejectBtn.removeEventListener("click", rejectHandler);
+            acceptBtn.addEventListener("click", acceptHandler, { once: true });
+            rejectBtn.addEventListener("click", rejectHandler, { once: true });
+        }
+
+        function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m]); }
+
+        selectUniqueBtn.addEventListener("click", enableSelectMode);
+        cancelUniqueBtn.addEventListener("click", exitSelectMode);
+        completeUniqueBtn.addEventListener("click", completeSelectedTasks);
+        deleteUniqueBtn.addEventListener("click", deleteSelectedTasks);
+        shareUniqueBtn.addEventListener("click", shareSelectedTasks);
+        document.getElementById("confirmShareBtn")?.addEventListener("click", confirmShareMultiple);
+        document.getElementById("cancelShareModalBtn")?.addEventListener("click", closeShareModal);
+        window.addEventListener("click", (e) => { if (e.target === document.getElementById("shareModal")) closeShareModal(); if (e.target === document.getElementById("receiveTaskPopup")) document.getElementById("receiveTaskPopup").style.display = "none"; });
+
+        setInterval(checkSharedTasks, 5000);
+        loadNotes();
+    </script>
+</body>
+
+</html>

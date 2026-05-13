@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login & Signup</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0f172a, #1e293b, #0f172a);
+            position: relative;
+        }
+
+        body::before,
+        body::after {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: rgba(0, 255, 255, 0.15);
+            filter: blur(80px);
+            animation: float 8s infinite alternate ease-in-out;
+        }
+
+        body::after {
+            background: rgba(255, 0, 255, 0.15);
+            right: -100px;
+            bottom: -100px;
+            animation-delay: 3s;
+        }
+
+        body::before {
+            left: -100px;
+            top: -100px;
+        }
+
+        @keyframes float {
+            from {
+                transform: translateY(0px) translateX(0px);
+            }
+
+            to {
+                transform: translateY(40px) translateX(30px);
+            }
+        }
+
+        .container {
+            position: relative;
+            width: 850px;
+            height: 550px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 25px;
+            backdrop-filter: blur(20px);
+
+            /* IMPORTANT FIX */
+            overflow: visible;
+
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .form-box {
+            position: absolute;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 40px;
+            transition: 0.8s ease-in-out;
+
+            z-index: 2;
+        }
+
+        .login {
+            left: 0;
+        }
+
+        .signup {
+            right: -100%;
+        }
+
+        .container.active .login {
+            left: -100%;
+        }
+
+        .container.active .signup {
+            right: 0;
+        }
+
+        h2 {
+            color: #fff;
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
+
+        .input-box {
+            width: 100%;
+            margin: 12px 0;
+            position: relative;
+        }
+
+        .input-box input {
+            width: 100%;
+            padding: 14px 18px;
+            border: none;
+            outline: none;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            font-size: 15px;
+            transition: 0.3s;
+        }
+
+        .input-box input:focus {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.03);
+            box-shadow: 0 0 15px cyan;
+        }
+
+        .input-box input::placeholder {
+            color: #ddd;
+        }
+
+        .btn {
+            margin-top: 20px;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(90deg, #00dbde, #fc00ff);
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.4s;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 10px 25px rgba(0, 255, 255, 0.4);
+        }
+
+        .toggle-box {
+            position: absolute;
+            width: 50%;
+            height: 100%;
+            right: 0;
+            background: linear-gradient(135deg, #00dbde, #fc00ff);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: #fff;
+            text-align: center;
+            padding: 40px;
+            transition: 0.8s ease-in-out;
+
+            z-index: 1;
+        }
+
+        .toggle-box h1 {
+            font-size: 38px;
+            margin-bottom: 15px;
+        }
+
+        .toggle-box p {
+            margin-bottom: 25px;
+            font-size: 15px;
+        }
+
+        .toggle-btn {
+            padding: 12px 35px;
+            border: 2px solid #fff;
+            background: transparent;
+            color: #fff;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 15px;
+        }
+
+        .toggle-btn:hover {
+            background: #fff;
+            color: #111;
+            transform: scale(1.08);
+        }
+
+        .container.active .toggle-box {
+            right: 50%;
+        }
+
+        @media(max-width:768px) {
+
+            .container {
+                width: 95%;
+                min-height: 650px;
+            }
+
+            .form-box,
+            .toggle-box {
+                width: 100%;
+                position: relative;
+            }
+
+            .toggle-box {
+                height: 220px;
+            }
+
+            .signup {
+                display: none;
+            }
+
+            .container.active .signup {
+                display: flex;
+            }
+
+            .container.active .login {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container" id="container">
+
+        <!-- Login Form -->
+        <div class="form-box login">
+            <h2>Login</h2>
+
+            <div class="input-box">
+                <input type="text" id="loginUsername" placeholder="Username" required>
+            </div>
+
+            <div class="input-box">
+                <input type="password" id="loginPassword" placeholder="Password" required>
+            </div>
+
+            <button class="btn" id="loginBtn">Login</button>
+        </div>
+
+        <!-- Signup Form -->
+        <div class="form-box signup">
+            <h2>Create Account</h2>
+
+            <div class="input-box">
+                <input type="text" id="signupName" placeholder="Full Name" required>
+            </div>
+
+            <div class="input-box">
+                <input type="text" id="signupUsername" placeholder="Username" required>
+            </div>
+
+            <div class="input-box">
+                <input type="password" id="signupPassword" placeholder="Password" required>
+            </div>
+
+            <button class="btn" id="signupBtn" onclick="signupbtn()">Sign Up</button>
+        </div>
+
+        <!-- Toggle Panel -->
+        <div class="toggle-box">
+            <h1>Welcome! User</h1>
+            <button class="toggle-btn" id="toggle">
+                Create Account
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+
+        // ================= TOGGLE LOGIN / SIGNUP =================
+
+        const container = document.getElementById('container');
+        const toggleBtn = document.getElementById('toggle');
+
+        let signupMode = false;
+
+        toggleBtn.addEventListener('click', () => {
+
+            signupMode = !signupMode;
+
+            container.classList.toggle('active');
+
+            if (signupMode) {
+                toggleBtn.innerText = "Back to Login";
+            } else {
+                toggleBtn.innerText = "Create Account";
+            }
+        });
+
+
+
+        // ================= SIGNUP FUNCTION =================
+
+        async function signupbtn() {
+
+            const name = document.getElementById("signupName").value;
+            const username = document.getElementById("signupUsername").value;
+            const password = document.getElementById("signupPassword").value;
+
+            // VALIDATION
+            if (!name || !username || !password) {
+
+                alert("Please fill all fields");
+
+                return;
+            }
+
+            try {
+
+                const response = await fetch("http://localhost:5000/signup", {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        name,
+                        username,
+                        password
+                    })
+                });
+
+                const data = await response.json();
+
+                alert(data.message);
+
+                // AFTER SUCCESSFUL SIGNUP
+                if (data.success) {
+
+                    // CLEAR INPUTS
+                    document.getElementById("signupName").value = "";
+                    document.getElementById("signupUsername").value = "";
+                    document.getElementById("signupPassword").value = "";
+
+                    // SWITCH TO LOGIN PAGE
+                    signupMode = false;
+
+                    container.classList.remove('active');
+
+                    toggleBtn.innerText = "Create Account";
+                }
+
+            } catch (error) {
+
+                console.log(error);
+
+                alert("Signup Failed");
+            }
+        }
+
+
+
+        // ================= LOGIN FUNCTION =================
+
+        document.getElementById("loginBtn").addEventListener("click", async () => {
+
+            const username = document.getElementById("loginUsername").value;
+            const password = document.getElementById("loginPassword").value;
+
+            // VALIDATION
+            if (!username || !password) {
+
+                alert("Please fill all fields");
+
+                return;
+            }
+
+            try {
+
+                const response = await fetch("http://localhost:5000/login", {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        username,
+                        password
+                    })
+                });
+
+                const data = await response.json();
+
+                // SUCCESS LOGIN
+                if (data.success) {
+
+                    // STORE USER DATA FROM MONGODB
+                    localStorage.setItem("loggedInUser", data.user.name);
+
+                    localStorage.setItem("loggedInUsername", data.user.username);
+
+                    alert("Login Successful");
+
+                    // REDIRECT TO DASHBOARD
+                    window.location.href = "main.html";
+
+                } else {
+
+                    alert(data.message);
+                }
+
+            } catch (error) {
+
+                console.log(error);
+
+                alert("Login Failed");
+            }
+        });
+
+    </script>
+
+</body>
+
+</html>
