@@ -7,6 +7,7 @@
     <title>Login & Signup</title>
 
     <style>
+        /* Your existing styles (keep as is) */
         * {
             margin: 0;
             padding: 0;
@@ -58,6 +59,70 @@
             }
         }
 
+        /* Custom Popup Styles */
+        .custom-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            z-index: 10000;
+            display: none;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            min-width: 320px;
+            text-align: center;
+            animation: popupFade 0.3s ease;
+        }
+
+        .custom-popup.success {
+            border-left: 5px solid #38ef7d;
+        }
+
+        .custom-popup.error {
+            border-left: 5px solid #ff416c;
+        }
+
+        .custom-popup.info {
+            border-left: 5px solid #00dbde;
+        }
+
+        .custom-popup p {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+
+        .custom-popup button {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #00dbde, #fc00ff);
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .custom-popup button:hover {
+            transform: scale(1.05);
+        }
+
+        @keyframes popupFade {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
         .container {
             position: relative;
             width: 850px;
@@ -65,10 +130,7 @@
             background: rgba(255, 255, 255, 0.08);
             border-radius: 25px;
             backdrop-filter: blur(20px);
-
-            /* IMPORTANT FIX */
             overflow: visible;
-
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
@@ -84,7 +146,6 @@
             flex-direction: column;
             padding: 40px;
             transition: 0.8s ease-in-out;
-
             z-index: 2;
         }
 
@@ -171,7 +232,6 @@
             text-align: center;
             padding: 40px;
             transition: 0.8s ease-in-out;
-
             z-index: 1;
         }
 
@@ -207,7 +267,6 @@
         }
 
         @media(max-width:768px) {
-
             .container {
                 width: 95%;
                 min-height: 650px;
@@ -245,35 +304,28 @@
         <!-- Login Form -->
         <div class="form-box login">
             <h2>Login</h2>
-
             <div class="input-box">
                 <input type="text" id="loginUsername" placeholder="Username" required>
             </div>
-
             <div class="input-box">
                 <input type="password" id="loginPassword" placeholder="Password" required>
             </div>
-
             <button class="btn" id="loginBtn">Login</button>
         </div>
 
         <!-- Signup Form -->
         <div class="form-box signup">
             <h2>Create Account</h2>
-
             <div class="input-box">
                 <input type="text" id="signupName" placeholder="Full Name" required>
             </div>
-
             <div class="input-box">
                 <input type="text" id="signupUsername" placeholder="Username" required>
             </div>
-
             <div class="input-box">
                 <input type="password" id="signupPassword" placeholder="Password" required>
             </div>
-
-            <button class="btn" id="signupBtn" onclick="signupbtn()">Sign Up</button>
+            <button class="btn" id="signupBtn">Sign Up</button>
         </div>
 
         <!-- Toggle Panel -->
@@ -286,152 +338,129 @@
 
     </div>
 
-    <script>
+    <!-- Custom Popup -->
+    <div id="customPopup" class="custom-popup">
+        <p id="popupMessage"></p>
+        <button onclick="closePopup()">OK</button>
+    </div>
 
-        // ================= TOGGLE LOGIN / SIGNUP =================
+    <script>
+        // ========== IMPORTANT: UPDATE THIS WITH YOUR RENDER BACKEND URL ==========
+        const API_BASE_URL = "https://sticky-notes-backend.onrender.com"; // Change this!
+        // =========================================================================
 
         const container = document.getElementById('container');
         const toggleBtn = document.getElementById('toggle');
-
         let signupMode = false;
 
-        toggleBtn.addEventListener('click', () => {
+        function showPopup(message, type = "info") {
+            const popup = document.getElementById("customPopup");
+            const popupMessage = document.getElementById("popupMessage");
+            popupMessage.innerText = message;
+            popup.className = `custom-popup ${type}`;
+            popup.style.display = "block";
 
-            signupMode = !signupMode;
-
-            container.classList.toggle('active');
-
-            if (signupMode) {
-                toggleBtn.innerText = "Back to Login";
-            } else {
-                toggleBtn.innerText = "Create Account";
-            }
-        });
-
-
-
-        // ================= SIGNUP FUNCTION =================
-
-        async function signupbtn() {
-
-            const name = document.getElementById("signupName").value;
-            const username = document.getElementById("signupUsername").value;
-            const password = document.getElementById("signupPassword").value;
-
-            // VALIDATION
-            if (!name || !username || !password) {
-
-                alert("Please fill all fields");
-
-                return;
-            }
-
-            try {
-
-                const response = await fetch("http://localhost:5000/signup", {
-
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-
-                    body: JSON.stringify({
-                        name,
-                        username,
-                        password
-                    })
-                });
-
-                const data = await response.json();
-
-                alert(data.message);
-
-                // AFTER SUCCESSFUL SIGNUP
-                if (data.success) {
-
-                    // CLEAR INPUTS
-                    document.getElementById("signupName").value = "";
-                    document.getElementById("signupUsername").value = "";
-                    document.getElementById("signupPassword").value = "";
-
-                    // SWITCH TO LOGIN PAGE
-                    signupMode = false;
-
-                    container.classList.remove('active');
-
-                    toggleBtn.innerText = "Create Account";
-                }
-
-            } catch (error) {
-
-                console.log(error);
-
-                alert("Signup Failed");
+            if (type !== "error") {
+                setTimeout(() => {
+                    popup.style.display = "none";
+                }, 3000);
             }
         }
 
+        function closePopup() {
+            document.getElementById("customPopup").style.display = "none";
+        }
 
+        toggleBtn.addEventListener('click', () => {
+            signupMode = !signupMode;
+            container.classList.toggle('active');
+            toggleBtn.innerText = signupMode ? "Back to Login" : "Create Account";
+        });
 
-        // ================= LOGIN FUNCTION =================
+        async function apiCall(endpoint, data) {
+            const url = `${API_BASE_URL}${endpoint}`;
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
 
-        document.getElementById("loginBtn").addEventListener("click", async () => {
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return await response.json();
+            } catch (error) {
+                console.error("API Error:", error);
+                throw new Error("Cannot connect to server");
+            }
+        }
 
-            const username = document.getElementById("loginUsername").value;
-            const password = document.getElementById("loginPassword").value;
+        document.getElementById("signupBtn").addEventListener("click", async () => {
+            const name = document.getElementById("signupName").value.trim();
+            const username = document.getElementById("signupUsername").value.trim();
+            const password = document.getElementById("signupPassword").value;
 
-            // VALIDATION
-            if (!username || !password) {
-
-                alert("Please fill all fields");
-
+            if (!name || !username || !password) {
+                showPopup("Please fill all fields", "error");
                 return;
             }
 
+            const btn = document.getElementById("signupBtn");
+            btn.innerText = "Creating...";
+            btn.disabled = true;
+
             try {
+                const data = await apiCall("/signup", { name, username, password });
+                showPopup(data.message, data.success ? "success" : "error");
 
-                const response = await fetch("http://localhost:5000/login", {
-
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-
-                    body: JSON.stringify({
-                        username,
-                        password
-                    })
-                });
-
-                const data = await response.json();
-
-                // SUCCESS LOGIN
                 if (data.success) {
-
-                    // STORE USER DATA FROM MONGODB
-                    localStorage.setItem("loggedInUser", data.user.name);
-
-                    localStorage.setItem("loggedInUsername", data.user.username);
-
-                    alert("Login Successful");
-
-                    // REDIRECT TO DASHBOARD
-                    window.location.href = "main.html";
-
-                } else {
-
-                    alert(data.message);
+                    document.getElementById("signupName").value = "";
+                    document.getElementById("signupUsername").value = "";
+                    document.getElementById("signupPassword").value = "";
+                    signupMode = false;
+                    container.classList.remove('active');
+                    toggleBtn.innerText = "Create Account";
                 }
-
             } catch (error) {
-
-                console.log(error);
-
-                alert("Login Failed");
+                showPopup(error.message, "error");
+            } finally {
+                btn.innerText = "Sign Up";
+                btn.disabled = false;
             }
         });
 
+        document.getElementById("loginBtn").addEventListener("click", async () => {
+            const username = document.getElementById("loginUsername").value.trim();
+            const password = document.getElementById("loginPassword").value;
+
+            if (!username || !password) {
+                showPopup("Please fill all fields", "error");
+                return;
+            }
+
+            const btn = document.getElementById("loginBtn");
+            btn.innerText = "Logging in...";
+            btn.disabled = true;
+
+            try {
+                const data = await apiCall("/login", { username, password });
+
+                if (data.success) {
+                    localStorage.setItem("loggedInUser", data.user.name);
+                    localStorage.setItem("loggedInUsername", data.user.username);
+                    showPopup("Login Successful! Redirecting...", "success");
+                    setTimeout(() => {
+                        window.location.href = "main.html";
+                    }, 1500);
+                } else {
+                    showPopup(data.message, "error");
+                }
+            } catch (error) {
+                showPopup(error.message, "error");
+            } finally {
+                btn.innerText = "Login";
+                btn.disabled = false;
+            }
+        });
     </script>
 
 </body>
